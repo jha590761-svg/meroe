@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: https:; worker-src 'self' blob:;">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A2418">
+<meta name="description" content="Recall: know exactly when you'll be exam-ready. Free, private, works offline.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recall">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Recall: exam-ready, on schedule</title>
+<style>
+  :root{
+    --bg:#F3F6F4; --surface:#FFFFFF; --ink:#0B1B14; --muted:#41544A; --line:#C5D1CA;
+    --brand:#0B5D36; --brand-ink:#FFFFFF; --dark:#0A2418; --mint:#9BF0C0; --warn:#B42318;
+    --serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  body.src{
+    --bg:#0C1330; --surface:#151F47; --ink:#F5F7FF; --muted:#C3CBEB; --line:#3A4880;
+    --brand:#FFC857; --brand-ink:#0C1330; --dark:#0C1330; --warn:#FF9C92;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;transition:background .3s,color .3s}
+  #app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 18px calc(100px + env(safe-area-inset-bottom))}
+  button,input,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+  body.src :focus-visible{outline-color:#fff}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:calc(18px + env(safe-area-inset-top)) 0 8px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand svg{width:38px;height:38px;flex:none}
+  .logo{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .tag{font-size:13px;color:var(--muted);margin-top:3px}
+  .streak{display:flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:7px 13px;font-weight:800}
+
+  .btn{min-height:52px;border-radius:14px;border:2px solid transparent;padding:12px 18px;font-weight:800;width:100%;background:var(--brand);color:var(--brand-ink)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.small{min-height:46px;width:auto}
+  .btn.danger{background:transparent;color:var(--warn);border-color:var(--warn)}
+  .card{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px}
+  .row{display:flex;gap:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .stat b{display:block;font-size:30px;line-height:1.1;font-family:var(--serif)}
+  .stat span{font-size:14px;color:var(--muted)}
+  .muted{color:var(--muted)}
+  h2.sec{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px;font-weight:700}
+
+  .hero{background:radial-gradient(120% 120% at 100% 0%,#14432E 0%,var(--dark) 60%);color:#fff;border-radius:26px;padding:22px;margin-top:10px}
+  .hero .top{display:flex;gap:18px;align-items:center}
+  .ring{width:112px;height:112px;flex:none}
+  .hero .lbl{color:#B7E8CB;font-size:14px;font-weight:600}
+  .hero .ttl{font-size:20px;font-weight:800;line-height:1.2;margin:2px 0}
+  .hero .big{font-family:var(--serif);font-size:56px;font-weight:700;line-height:1}
+  .hero .btn{background:var(--mint);color:#04140C;margin-top:18px}
+  .hero .btn:disabled{background:#2F4A3D;color:#D5E5DB;opacity:1}
+  .plan{display:flex;gap:8px;margin-top:16px}
+  .plan div{flex:1;background:rgba(255,255,255,.09);border-radius:12px;padding:10px 12px}
+  .plan b{display:block;font-size:20px;font-family:var(--serif)}
+  .plan span{font-size:12px;color:#B7E8CB}
+
+  .bars{display:flex;gap:8px;align-items:flex-end;height:84px;margin-top:8px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+  .bar i{display:block;width:100%;border-radius:6px;background:var(--line)}
+  .bar.t i{background:var(--brand)}
+  .bar span{font-size:12px;color:var(--muted);font-weight:700}
+
+  .flash{background:var(--surface);border:2px solid var(--line);border-radius:26px;min-height:290px;padding:26px;display:flex;flex-direction:column;justify-content:center;text-align:center;animation:flip .3s ease}
+  .flash .side{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .flash .txt{font-family:var(--serif);font-size:24px;line-height:1.35}
+  .flash .cite{margin-top:16px;font-size:13px;color:var(--muted)}
+  @keyframes flip{from{transform:rotateX(60deg);opacity:0}to{transform:none;opacity:1}}
+  .grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .g{border-radius:14px;padding:10px 4px;text-align:center;border:2px solid;font-weight:800;min-height:64px}
+  .g small{display:block;font-weight:600;font-size:12px;margin-top:2px}
+  .g0{background:#FDE3E0;color:#6E0F08;border-color:#B42318}
+  .g1{background:#FFEBC2;color:#5A3300;border-color:#B26A00}
+  .g2{background:#CDEFD9;color:#083F24;border-color:#0B5D36}
+  .g3{background:#0B5D36;color:#fff;border-color:#0B5D36}
+  .progress{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 12px}
+  .progress i{display:block;height:100%;background:var(--brand)}
+
+  input.f,textarea.f{width:100%;background:transparent;border:0;border-bottom:2px solid var(--line);padding:12px 2px;outline:none;font-size:16px}
+  textarea.f{resize:none}
+  .box{border:2px solid var(--line)!important;border-radius:12px;padding:12px!important;margin-top:8px}
+  .seg{display:flex;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:4px;margin-top:10px}
+  .seg button{flex:1;border:0;background:none;border-radius:10px;padding:10px;font-weight:700;color:var(--muted);min-height:44px}
+  .seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+  .item{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+  .item .q{font-weight:700}
+  .item .a{font-size:14px;color:var(--muted);margin-top:2px}
+  .chipsrc{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);border:1.5px solid var(--brand);border-radius:6px;padding:1px 7px;margin:6px 6px 0 0}
+  .chipst{display:inline-block;font-size:12px;font-weight:700;color:var(--muted);margin-top:6px}
+  .icon-btn{background:none;border:0;padding:10px;margin:-6px -6px 0 0;color:var(--warn)}
+  .draft input{width:24px;height:24px;margin-top:2px;accent-color:var(--brand);flex:none}
+
+  nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+  nav .in{max-width:480px;margin:0 auto;display:flex}
+  nav button{flex:1;background:none;border:0;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--muted)}
+  nav button[aria-current="page"]{color:var(--ink);font-weight:800}
+  nav button[aria-current="page"] svg{stroke:var(--brand)}
+  nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--brand);font-weight:700;margin-top:8px}
+  .src-title{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.02em;margin:6px 0 14px}
+  .ask{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:14px}
+  .ask textarea{width:100%;background:transparent;border:0;outline:none;resize:none;font-size:18px;min-height:76px}
+  .ask textarea::placeholder{color:var(--muted);opacity:.85}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 18px 4px;margin:0 -18px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:2px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;min-height:40px}
+  .chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:800}
+  .res{display:flex;gap:14px;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px;margin-top:12px}
+  .num{font-family:var(--mono);font-size:30px;font-weight:800;color:var(--brand);line-height:1}
+  .res .nm{font-size:19px;font-weight:800;line-height:1.2}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--brand);color:var(--brand);border-radius:6px;padding:2px 7px;margin:6px 0;font-weight:700}
+  .res p{margin:4px 0 12px;font-size:15px;color:var(--muted)}
+  .open{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:12px;background:var(--brand);color:var(--brand-ink);font-weight:800;text-decoration:none;width:100%}
+  .note{border-left:4px solid var(--brand);padding:8px 12px;margin-top:14px;font-size:14px;color:var(--muted)}
+  .hist{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 2px;font-size:15px}
+
+  /* ---------- Lens Insight ---------- */
+  body.lens{--bg:#050507;--surface:#0D0D12;--ink:#F5F3FF;--muted:#A7A3B5;--line:#292532;--brand:#9A63FF;--brand-ink:#0A0612;--dark:#050507;--warn:#FF8F9A}
+  body.lens #app{max-width:520px}
+  .lens-shell{min-height:calc(100vh - 92px);padding:4px 0 24px}
+  .lens-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 30%,#191126 0%,#09080D 44%,#030304 100%);border:1px solid #2D2638;border-radius:28px;padding:28px 20px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+  .lens-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:#B88CFF;font-weight:800;text-transform:uppercase}
+  .lens-title{font-size:32px;line-height:1.06;letter-spacing:-.03em;font-weight:850;margin:7px 0 8px}
+  .lens-sub{color:#B8B2C8;font-size:15px;margin:0;max-width:38ch}
+  .lens-orbit{height:210px;position:relative;margin:8px -8px 4px}
+  .lens-orbit:before,.lens-orbit:after{content:"";position:absolute;left:50%;top:50%;border:1px solid rgba(154,99,255,.18);border-radius:50%;transform:translate(-50%,-50%) rotate(-12deg);width:180px;height:74px}
+  .lens-orbit:after{width:240px;height:100px;transform:translate(-50%,-50%) rotate(22deg);border-color:rgba(255,255,255,.07)}
+  .lens-hole{position:absolute;left:50%;top:56%;width:92px;height:92px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 50% 48%,#000 0 35%,#140D20 48%,#5A2BB1 60%,transparent 70%);box-shadow:0 0 55px rgba(154,99,255,.28)}
+  .lens-astronaut{position:absolute;left:50%;top:42%;font-size:54px;transform:translate(-50%,-50%) rotate(-24deg);filter:drop-shadow(0 10px 20px rgba(154,99,255,.3));animation:lensFall 1.9s ease-in-out infinite}
+  @keyframes lensFall{0%{top:17%;transform:translate(-50%,-50%) rotate(-18deg) scale(1)}55%{top:43%;transform:translate(-50%,-50%) rotate(-32deg) scale(.9)}100%{top:67%;transform:translate(-50%,-50%) rotate(-48deg) scale(.65);opacity:.28}}
+  .lens-loading{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;color:#D7CCEA;font-weight:700;font-size:14px}
+  .lens-dots{display:inline-flex;gap:4px}.lens-dots i{width:5px;height:5px;border-radius:50%;background:#A874FF;animation:lensDot 1s infinite}.lens-dots i:nth-child(2){animation-delay:.16s}.lens-dots i:nth-child(3){animation-delay:.32s}
+  @keyframes lensDot{0%,60%,100%{opacity:.25;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+  .lens-panel{background:#09090C;border:1px solid #292532;border-radius:24px;padding:18px;margin-top:14px}
+  .lens-panel h3{margin:0 0 5px;font-size:19px}.lens-panel p{margin:0;color:#A7A3B5;font-size:14px}
+  .lens-action{width:100%;min-height:64px;border:1px solid #30283D;background:#101016;color:#F5F3FF;border-radius:16px;text-align:left;padding:12px 14px;display:flex;gap:12px;align-items:center;margin-top:10px}
+  .lens-action .ico{width:40px;height:40px;border-radius:12px;background:#1C1428;display:grid;place-items:center;font-size:21px;flex:none}.lens-action b{display:block;font-size:15px}.lens-action span{display:block;color:#A7A3B5;font-size:12px;margin-top:2px}.lens-action strong{margin-left:auto;color:#B88CFF;font-size:20px}
+  .lens-camera{position:relative;overflow:hidden;border-radius:22px;background:#000;border:1px solid #2C2636;aspect-ratio:3/4;margin-top:12px}.lens-camera video,.lens-camera img{width:100%;height:100%;object-fit:cover;display:block}.lens-camera .guide{position:absolute;inset:12% 10%;border:1.5px solid rgba(184,140,255,.8);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.16);pointer-events:none}.lens-camera .corner{position:absolute;inset:12% 10%;border-radius:18px;pointer-events:none;background:linear-gradient(#B88CFF,#B88CFF) left top/28px 2px no-repeat,linear-gradient(#B88CFF,#B88CFF) left top/2px 28px no-repeat,linear-gradient(#B88CFF,#B88CFF) right top/28px 2px no-repeat,linear-gradient(#B88CFF,#B88CFF) right top/2px 28px no-repeat,linear-gradient(#B88CFF,#B88CFF) left bottom/28px 2px no-repeat,linear-gradient(#B88CFF,#B88CFF) left bottom/2px 28px no-repeat,linear-gradient(#B88CFF,#B88CFF) right bottom/28px 2px no-repeat,linear-gradient(#B88CFF,#B88CFF) right bottom/2px 28px no-repeat}
+  .lens-status{font-size:13px;color:#B8B2C8;margin-top:9px}.lens-badge{display:inline-flex;border:1px solid #4A3861;color:#C7A7FF;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+  .lens-preview{width:100%;border-radius:18px;border:1px solid #30283D;display:block;background:#000;margin-top:12px;max-height:360px;object-fit:contain}
+  .lens-result{background:linear-gradient(145deg,#100D16,#09090C);border:1px solid #332A40;border-radius:20px;padding:16px;margin-top:12px}.lens-result b{font-size:16px}.lens-result p{color:#AAA4B7;font-size:13px;margin:5px 0 0}
+  .lens-local{background:linear-gradient(145deg,#0D0D13,#09090C);border:1px solid #332A40;border-radius:22px;padding:16px;margin-top:12px}
+  .lens-local-head{display:flex;align-items:flex-start;gap:10px}.lens-local-head .ico{width:42px;height:42px;border-radius:13px;background:#1A1226;display:grid;place-items:center;font-size:21px;flex:none}.lens-local-head b{font-size:16px}.lens-local-head span{display:block;color:#A7A3B5;font-size:12px;margin-top:2px}
+  .lens-chat{margin-top:14px;max-height:430px;overflow:auto;padding-right:2px}.lens-chat-msg{border:1px solid #292532;border-radius:16px;padding:11px 12px;margin-top:9px;font-size:14px;white-space:pre-wrap}.lens-chat-msg.user{background:#171020;border-color:#3B2B4E}.lens-chat-msg.ai{background:#0C0C10}.lens-chat-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#A874FF;font-weight:800;margin-bottom:4px}
+  .lens-chat-form{display:flex;gap:8px;margin-top:12px}.lens-chat-input{min-height:48px;flex:1;resize:none;background:#0A0A0D;border:1px solid #39313F;border-radius:14px;padding:11px 12px;outline:none}.lens-chat-input:focus{border-color:#A874FF}.lens-chat-send{min-width:78px;border:0;border-radius:14px;background:#B88CFF;color:#08050D;font-weight:850}.lens-chat-send:disabled{opacity:.45}.lens-starters{display:flex;gap:7px;overflow:auto;margin-top:10px;padding-bottom:2px}.lens-starters button{white-space:nowrap;border:1px solid #3A3048;background:#111016;color:#D9D1E7;border-radius:999px;padding:8px 10px;font-size:12px}.lens-ai-progress{margin-top:10px;color:#CFC4DE;font-size:12px;line-height:1.4}.lens-ai-progress .bar{height:5px;background:#211B2B;border-radius:999px;overflow:hidden;margin-top:6px}.lens-ai-progress .fill{height:100%;background:#A874FF;border-radius:999px;transition:width .2s}
+  .lens-mini{font-size:12px;color:#8F899B;margin-top:12px;line-height:1.5}
+  .lens-check{margin-top:10px;min-height:44px;border:1px solid #6B4FA0;background:transparent;color:#D9C2FF;border-radius:12px;padding:8px 12px;font-weight:700;font-size:13px}
+  .from-lens{background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:14px;margin-bottom:14px}.from-lens p{margin:6px 0;font-size:14px;color:var(--muted)}.from-lens blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid var(--brand);font-size:14px;white-space:pre-wrap}
+  .lens-back{background:transparent;border:0;color:#BDA0F5;font-weight:800;padding:8px 0;margin-bottom:4px}
+  .lens-hidden{display:none!important}
+  @media (prefers-reduced-motion:reduce){.lens-astronaut,.lens-dots i{animation:none}}
+  .welcome{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 0}
+  .welcome h1{font-family:var(--serif);font-size:38px;line-height:1.08;letter-spacing:-.02em;margin:22px 0 10px}
+  .point{display:flex;gap:14px;margin-top:16px}
+  .point b{display:block}
+  .point span{color:var(--muted);font-size:15px}
+  .dot{flex:none;width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .msg{font-size:14px;color:var(--muted);margin-top:8px}
+  @media (prefers-reduced-motion:reduce){.flash{animation:none}*{transition:none!important}}
+  /* ---------- Motion Studio ---------- */
+  body.studio{--bg:#000;--surface:#0B0B0E;--ink:#F2F4F5;--muted:#9AA3A8;--line:#262B30;--brand:#3DF5C6;--brand-ink:#001A14;--dark:#000;--warn:#FF8A8A}
+  body.studio #app{max-width:520px}
+  .st-kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--brand);font-weight:800;margin-top:8px}
+  .st-title{font-size:30px;font-weight:850;line-height:1.08;letter-spacing:-.02em;margin:6px 0 12px}
+  .st-canvas{display:block;width:100%;height:min(46vh,460px);min-height:280px;margin-top:12px;border-radius:22px;background:#000;border:1px solid #252A2F;touch-action:none;-webkit-user-select:none;user-select:none}
+  .st-tools{display:flex;gap:8px;margin-top:10px}
+  .st-tool{flex:1;min-height:48px;border:1.5px solid var(--line);background:transparent;border-radius:14px;font-weight:700;font-size:14px;color:var(--ink);padding:0 6px}
+  .st-tool[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+  .st-play{display:flex;gap:12px;align-items:center;margin-top:10px}
+  .st-play .btn{width:128px;flex:none}
+  .st-time{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+  .st-time input{width:100%;accent-color:var(--brand)}
+  .st-time span{font-size:12px;color:var(--muted);font-family:var(--mono)}
+  .st-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .st-swatches{display:flex;gap:10px;margin-top:12px}
+  .st-sw{width:38px;height:38px;border-radius:50%;border:3px solid transparent;outline:1px solid var(--line)}
+  .st-sw[aria-pressed="true"]{border-color:#fff}
+  .st-slider{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .st-slider label{width:86px;font-size:14px;color:var(--muted);font-weight:700}
+  .st-slider input{flex:1;accent-color:var(--brand)}
+  .st-slider span{width:44px;text-align:right;font-size:13px;color:var(--muted);font-family:var(--mono)}
+  .st-video{width:100%;border-radius:16px;background:#000;margin-top:12px;border:1px solid var(--line)}
+  nav button{font-size:11px}
+  /* ---------- Launch splash: icon loads, a flash runs along the symbol ---------- */
+  #splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(90% 70% at 50% 42%,#0F3322 0%,#0A2418 55%,#04110B 100%);animation:spOut .5s ease 2.05s forwards;overflow:hidden}
+  @keyframes spOut{to{opacity:0;transform:scale(1.04);visibility:hidden}}
+  .sp-logo{position:relative;width:132px;height:132px;opacity:0;transform:scale(.84);animation:spIn .6s cubic-bezier(.2,.8,.2,1) .1s forwards}
+  .sp-logo svg{position:relative;width:100%;height:100%;display:block;overflow:visible}
+  @keyframes spIn{to{opacity:1;transform:scale(1)}}
+  .sp-glow{position:absolute;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,rgba(155,240,192,.6) 0%,rgba(155,240,192,0) 62%);opacity:0;transform:scale(.4);animation:spGlow .8s ease-out 1.4s forwards;pointer-events:none}
+  @keyframes spGlow{0%{opacity:0;transform:scale(.4)}35%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
+  .sp-flare{position:absolute;left:50%;top:50%;width:380px;height:3px;margin:-1.5px 0 0 -190px;background:linear-gradient(90deg,transparent,rgba(233,255,244,.95) 50%,transparent);opacity:0;transform:scaleX(0);animation:spFlare .85s cubic-bezier(.2,.7,.2,1) 1.4s forwards;pointer-events:none}
+  @keyframes spFlare{0%{opacity:0;transform:scaleX(0)}30%{opacity:1;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1.15)}}
+  .sp-base{stroke:rgba(155,240,192,.3);animation:spLit .7s ease 1.45s forwards}
+  @keyframes spLit{0%{stroke:rgba(155,240,192,.3)}45%{stroke:#F2FFF8}100%{stroke:#9BF0C0}}
+  .sp-streak{stroke-dasharray:0 100;stroke-dashoffset:0;opacity:0;animation:spRun 1.05s cubic-bezier(.45,.05,.35,1) .5s forwards}
+  @keyframes spRun{
+    0%{stroke-dasharray:0 100;stroke-dashoffset:0;opacity:0}
+    6%{opacity:1}
+    55%{stroke-dasharray:46 100;stroke-dashoffset:-14;opacity:1}
+    94%{opacity:1}
+    100%{stroke-dasharray:1 100;stroke-dashoffset:-99;opacity:0}
+  }
+  .sp-word{margin-top:26px;font-size:34px;font-weight:800;color:#fff;letter-spacing:.28em;opacity:0;transform:translateY(8px);animation:spWord .7s cubic-bezier(.2,.8,.2,1) 1.5s forwards}
+  @keyframes spWord{to{opacity:1;transform:none;letter-spacing:-.02em}}
+  .sp-tag{margin-top:8px;font-size:14px;color:#9BD7B6;opacity:0;animation:spTag .6s ease 1.75s forwards}
+  @keyframes spTag{to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    #splash{animation:spOut .3s ease .9s forwards}
+    .sp-logo{animation:none;opacity:1;transform:none}
+    .sp-streak,.sp-glow,.sp-flare{display:none}
+    .sp-base{animation:none;stroke:#9BF0C0}
+    .sp-word,.sp-tag{animation:none;opacity:1;transform:none;letter-spacing:-.02em}
+  }
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <div class="sp-logo">
+    <div class="sp-glow"></div>
+    <svg viewBox="0 0 38 38">
+      <defs>
+        <linearGradient id="spTile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#11804C"/><stop offset="1" stop-color="#0B5D36"/></linearGradient>
+        <filter id="spBlur" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <rect width="38" height="38" rx="11" fill="url(#spTile)"/>
+      <path class="sp-base" pathLength="100" d="M7 11C10 11 12 19 14 26V14C17 14 18.5 20 20.5 26V17C23.5 17 25 21 31 26" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <g filter="url(#spBlur)"><path class="sp-streak" pathLength="100" d="M7 11C10 11 12 19 14 26V14C17 14 18.5 20 20.5 26V17C23.5 17 25 21 31 26" fill="none" stroke="#F4FFF9" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </svg>
+    <div class="sp-flare"></div>
+  </div>
+  <div class="sp-word">Recall</div>
+  <div class="sp-tag">Exam-ready, on schedule</div>
+</div>
+<div id="app"></div>
+<noscript><strong>Recall needs JavaScript enabled.</strong> Please enable JavaScript in your browser and reopen this file.</noscript>
+<script>
+/* Recovery panel: if anything stops the app from drawing, show a readable screen instead of a blank one. */
+(function(){
+  function panel(msg){
+    var a=document.getElementById("app"); if(!a) return;
+    document.body.className="";
+    a.innerHTML='<div style="padding:32px 20px;max-width:480px;margin:0 auto;font-family:system-ui,sans-serif;color:#0B1B14">'
+      +'<h2 style="margin:0 0 8px">Recall hit a problem</h2>'
+      +'<p style="margin:0 0 14px;color:#41544A">Your cards are safe. Tap Reload first. If it keeps happening, try the second button.</p>'
+      +'<pre id="fx-msg" style="white-space:pre-wrap;font-size:12px;background:#E8EEE9;border-radius:10px;padding:10px;overflow:auto;max-height:140px"></pre>'
+      +'<button id="fx-reload" style="width:100%;min-height:52px;border-radius:14px;border:0;background:#0B5D36;color:#fff;font-weight:800;font-size:16px;margin-top:6px">Reload</button>'
+      +'<button id="fx-lens" style="width:100%;min-height:52px;border-radius:14px;border:2px solid #AEBFB4;background:transparent;color:#0B1B14;font-weight:700;font-size:16px;margin-top:10px">Reset Lens settings and reload</button>'
+      +'<button id="fx-all" style="width:100%;min-height:52px;border-radius:14px;border:2px solid #B42318;background:transparent;color:#B42318;font-weight:700;font-size:16px;margin-top:10px">Erase all app data and reload</button></div>';
+    document.getElementById("fx-msg").textContent=String(msg||"Unknown error");
+    document.getElementById("fx-reload").onclick=function(){location.reload();};
+    document.getElementById("fx-lens").onclick=function(){try{["recall:lens:inflight","recall:lens:safe","recall:lens-captures:v1"].forEach(function(k){localStorage.removeItem(k);});}catch(e){} location.reload();};
+    document.getElementById("fx-all").onclick=function(){if(confirm("Erase all cards and progress on this phone? This can't be undone.")){try{localStorage.clear();}catch(e){} location.reload();}};
+  }
+  window.__recallPanel=panel;
+  window.addEventListener("error",function(e){var a=document.getElementById("app"); if(a && !a.innerHTML.trim()) panel(e.message||"Unknown error");});
+  window.addEventListener("load",function(){setTimeout(function(){var a=document.getElementById("app"); if(a && !a.innerHTML.trim()) panel("The app did not finish starting.");},1500);});
+  setTimeout(function(){var s=document.getElementById("splash"); if(s&&s.parentNode) s.parentNode.removeChild(s);},2800);
+})();
+</script>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const DAY = 864e5, KEY = "recall:v3";
+const enc = encodeURIComponent;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = n => String(n).padStart(2, "0");
+const ymd = t => { const d = new Date(t); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+const todayKey = () => ymd(Date.now());
+
+/* ---------- trusted source library (free; opens in the browser) ---------- */
+const site = d => q => "https://duckduckgo.com/?q=" + enc("site:" + d + " " + q);
+const S_ = {
+  wiki:{n:"Wikipedia",t:"Encyclopedia",why:"Broad overview with citations you can follow to the original sources.",u:q=>"https://en.wikipedia.org/w/index.php?search="+enc(q)},
+  brit:{n:"Encyclopaedia Britannica",t:"Encyclopedia",why:"Articles written and fact-checked by editors and subject experts.",u:q=>"https://www.britannica.com/search?query="+enc(q)},
+  scholar:{n:"Google Scholar",t:"Research index",why:"Finds peer-reviewed papers, theses and academic books.",u:q=>"https://scholar.google.com/scholar?q="+enc(q)},
+  khan:{n:"Khan Academy",t:"Nonprofit education",why:"Free lessons and practice from a nonprofit, built around school curricula.",u:q=>"https://www.khanacademy.org/search?page_search_query="+enc(q)},
+  ncbi:{n:"NCBI Bookshelf",t:"Government library",why:"Free textbooks and references from the US National Library of Medicine.",u:q=>"https://www.ncbi.nlm.nih.gov/books/?term="+enc(q)},
+  pubmed:{n:"PubMed",t:"Research index",why:"Biomedical research papers indexed by the US National Library of Medicine.",u:q=>"https://pubmed.ncbi.nlm.nih.gov/?term="+enc(q)},
+  medline:{n:"MedlinePlus",t:"Government health",why:"Plain-language health information from the US National Library of Medicine.",u:q=>"https://vsearch.nlm.nih.gov/vivisimo/cgi-bin/query-meta?v%3Aproject=medlineplus&query="+enc(q)},
+  mayo:{n:"Mayo Clinic",t:"Medical centre",why:"Patient articles reviewed by clinicians at a nonprofit medical centre.",u:q=>"https://www.mayoclinic.org/search/search-results?q="+enc(q)},
+  ocw:{n:"MIT OpenCourseWare",t:"University",why:"Free course materials published by MIT.",u:q=>"https://ocw.mit.edu/search/?q="+enc(q)},
+  pubchem:{n:"PubChem",t:"Government database",why:"Chemical data maintained by the US National Institutes of Health.",u:q=>"https://pubchem.ncbi.nlm.nih.gov/#query="+enc(q)},
+  libre:{n:"LibreTexts",t:"University textbooks",why:"Open textbooks written by university faculty.",u:site("chem.libretexts.org")},
+  nasa:{n:"NASA",t:"Government agency",why:"Primary source for space and Earth science.",u:site("nasa.gov")},
+  esa:{n:"European Space Agency",t:"Government agency",why:"Primary source for European space science.",u:site("esa.int")},
+  mathw:{n:"Wolfram MathWorld",t:"Reference",why:"Detailed math reference maintained by Wolfram Research.",u:q=>"https://mathworld.wolfram.com/search/?query="+enc(q)},
+  loc:{n:"Library of Congress",t:"Government library",why:"Primary sources and archives from the US national library.",u:q=>"https://www.loc.gov/search/?q="+enc(q)},
+  mdn:{n:"MDN Web Docs",t:"Documentation",why:"Reference documentation maintained by Mozilla and contributors.",u:q=>"https://developer.mozilla.org/en-US/search?q="+enc(q)},
+  stack:{n:"Stack Overflow",t:"Community Q&A",why:"Vote-ranked answers from working developers.",u:q=>"https://stackoverflow.com/search?q="+enc(q)},
+  invest:{n:"Investopedia",t:"Reference",why:"Finance and economics explainers with an editorial review process.",u:q=>"https://www.investopedia.com/search?q="+enc(q)},
+  wb:{n:"World Bank",t:"International institution",why:"Official development data and research.",u:site("worldbank.org")},
+  usagov:{n:"USA.gov",t:"Government",why:"Official information from the US government.",u:q=>"https://search.usa.gov/search?affiliate=usagov&query="+enc(q)},
+  lii:{n:"Cornell Legal Information Institute",t:"University",why:"Free US legal texts from Cornell Law School.",u:q=>"https://www.law.cornell.edu/search/site/"+enc(q)},
+  nclim:{n:"NASA Climate",t:"Government agency",why:"Evidence and data on climate and the environment.",u:site("climate.nasa.gov")},
+  noaa:{n:"NOAA",t:"Government agency",why:"US primary source for weather, ocean and climate data.",u:site("noaa.gov")},
+  sep:{n:"Stanford Encyclopedia of Philosophy",t:"University",why:"Peer-reviewed entries by academic philosophers.",u:q=>"https://plato.stanford.edu/search/searcher.py?query="+enc(q)},
+  iep:{n:"Internet Encyclopedia of Philosophy",t:"Peer-reviewed",why:"Peer-reviewed entries by academic philosophers.",u:site("iep.utm.edu")}
+};
+const CATS = [
+  {id:"general",name:"General",kw:[],src:["wiki","brit","scholar"]},
+  {id:"biology",name:"Biology",kw:["cell","dna","rna","gene","protein","enzyme","photosynthesis","mitochondri","evolution","organism","species","bacteria","ecosystem","heart","blood","neuron","osmosis","mitosis","meiosis","chromosom","biolog","plant","anatomy"],src:["khan","ncbi","brit"]},
+  {id:"health",name:"Health",kw:["disease","symptom","vaccine","diabetes","cancer","medicine","medication","infection","virus","fever","nutrition","sleep","mental health","anxiety","depression","treatment","diagnos","blood pressure"],src:["medline","mayo","pubmed"],note:"General information only, not medical advice. For symptoms or treatment, talk to a qualified clinician."},
+  {id:"chemistry",name:"Chemistry",kw:["atom","molecule","element","periodic","bond","acid","reaction","compound","chemical","electron","ion","solution","oxidation"],src:["khan","libre","pubchem"]},
+  {id:"physics",name:"Physics",kw:["force","velocity","gravity","energy","momentum","quantum","relativity","wave","electric","magnet","newton","thermodynamic","friction","acceleration","circuit","optics"],src:["khan","ocw","brit"]},
+  {id:"space",name:"Space",kw:["planet","star","galaxy","moon","solar system","black hole","nasa","orbit","telescope","mars","universe","asteroid","comet","rocket","space"],src:["nasa","esa","brit"]},
+  {id:"math",name:"Math",kw:["equation","algebra","calculus","derivative","integral","geometry","theorem","probability","statistics","matrix","prime","fraction","trigonometr","polynomial","proof"],src:["khan","mathw","wiki"]},
+  {id:"history",name:"History",kw:["war","empire","revolution","ancient","century","dynasty","treaty","colonial","civilization","medieval","independence","history"],src:["brit","loc","wiki"]},
+  {id:"computing",name:"Coding",kw:["code","programming","javascript","python","html","css","algorithm","database","api","software","bug","array","react","git","sql","compile"],src:["mdn","stack","wiki"]},
+  {id:"economics",name:"Economics",kw:["inflation","gdp","economy","economic","stock","market","interest rate","tax","trade","supply","demand","recession","bank","invest","budget"],src:["invest","khan","wb"]},
+  {id:"law",name:"Law",kw:["law","legal","constitution","court","rights","amendment","contract","legislat","congress","citizen","election","government"],src:["usagov","lii","brit"],note:"These sources focus on the United States. Laws differ by country."},
+  {id:"earth",name:"Earth",kw:["climate","weather","earthquake","volcano","ocean","global warming","carbon","pollution","atmosphere","glacier","hurricane","rainforest","environment","renewable"],src:["nclim","noaa","brit"]},
+  {id:"philosophy",name:"Philosophy",kw:["ethics","moral","philosoph","consciousness","free will","existential","utilitarian","stoic","metaphysic","epistemolog","logic"],src:["sep","iep","brit"]}
+];
+function detect(q){
+  const s = q.toLowerCase(); let best = CATS[0], top = 0;
+  for (const c of CATS){ let n = 0; for (const k of c.kw) if (new RegExp("\\b" + k).test(s)) n++; if (n > top){ top = n; best = c; } }
+  return best.id;
+}
+
+/* ---------- notes -> cards (rule-based, no AI, no cost) ---------- */
+function draftCards(text){
+  const out = [], seen = new Set();
+  const push = (f, b) => {
+    f = f.trim(); b = b.trim();
+    if (f.length < 3 || b.length < 2) return;
+    const k = f.toLowerCase(); if (seen.has(k)) return; seen.add(k);
+    out.push({f, b, on:true});
+  };
+  const lines = text.split(/\n+/).map(l => l.replace(/^[\s\-*•\d.)]+/, "").trim()).filter(Boolean);
+  for (const line of lines){
+    let m;
+    if ((m = line.match(/^q[:.]\s*(.+?)\s+a[:.]\s*(.+)$/i))){ push(m[1], m[2]); continue; }
+    if ((m = line.match(/^(.{4,140}?\?)\s+(.{2,})$/))){ push(m[1], m[2]); continue; }
+    if ((m = line.match(/^([^:]{2,60}):\s+(.{3,})$/)) && m[1].trim().split(/\s+/).length <= 6){ push("Define: " + m[1], m[2]); continue; }
+    if ((m = line.match(/^(.{2,60}?)\s+[-–—]\s+(.{3,})$/)) && m[1].trim().split(/\s+/).length <= 6){ push("Define: " + m[1], m[2]); continue; }
+    const sentences = line.match(/[^.!?]+[.!?]?/g) || [];
+    for (let s of sentences){
+      s = s.trim(); if (s.length < 20 || s.length > 220) continue;
+      if ((m = s.match(/\*\*(.+?)\*\*/))){ push(s.replace(m[0], "_____").replace(/\*\*/g, ""), m[1]); continue; }
+      if ((m = s.match(/^(?:the |a |an )?(.{2,40}?)\s+(is|are|means|refers to)\s+(.{8,})$/i))) push("_____ " + m[2] + " " + m[3], m[1]);
+    }
+  }
+  return out.slice(0, 60);
+}
+
+/* ---------- state ---------- */
+const STARTER = [
+  ["What is the powerhouse of the cell?","The mitochondrion, where most ATP is produced."],
+  ["What is the function of ribosomes?","They build proteins by translating mRNA."],
+  ["Name the four DNA bases.","Adenine, thymine, guanine, cytosine."],
+  ["What is osmosis?","Movement of water across a semi-permeable membrane from low to high solute concentration."],
+  ["Where does photosynthesis occur?","In the chloroplasts, mainly in leaf cells."],
+  ["What does an enzyme do?","It speeds up a reaction by lowering the activation energy."]
+];
+const newCard = (f, b, src) => ({id:uid(), front:f, back:b, src:src || "", interval:0, ease:2.5, reps:0, due:Date.now(), last:null});
+function load(){
+  try{
+    const v = localStorage.getItem(KEY); if (v) return JSON.parse(v);
+    const o = localStorage.getItem("recall:v2");
+    if (o){ const p = JSON.parse(o); p.cards = p.cards.map(c => ({...c, src:"", last:c.reps > 0 ? c.due - c.interval*DAY : null})); p.onboarded = true; return p; }
+  }catch(e){}
+  return null;
+}
+let S = Object.assign({exam:null, log:{}, day:null, history:[], onboarded:false, streak:0, lastStudy:null},
+  load() || {cards: STARTER.map(([f,b]) => newCard(f,b))});
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+const ui = {tab:"today", reviewing:false, shown:false, mode:"write", drafts:[], front:"", back:"", srcn:"", notes:"", bk:"", q:"", exname:"", exdate:"", msg:"", topic:null, searched:false, lastSrc:"", aiAnswer:"", aiCites:[], aiError:"", aiLoading:false, lensStage:"home", lensStream:null, lensImage:"", lensFile:null, lensError:"", lensBusy:false, lensAIReady:false, lensAILoading:false, lensAIError:"", lensAIProgress:"", lensAIProgressPct:0, lensAIQuestion:"", lensAIHistory:[]};
+
+/* ---------- scheduling ---------- */
+function grade(card, g){
+  let {interval, ease, reps} = card; const now = Date.now();
+  if (g === 0) return {...card, reps:0, interval:0, ease:Math.max(1.3, ease-.2), due:now + 10*60000, last:now};
+  if (g === 1){ interval = Math.max(1, Math.round(interval*1.2)); ease = Math.max(1.3, ease-.15); }
+  else if (g === 2){ interval = reps === 0 ? 1 : reps === 1 ? 3 : Math.round(interval*ease); }
+  else { interval = reps === 0 ? 3 : Math.round(Math.max(interval,1)*ease*1.3) + 1; ease += .1; }
+  return {...card, reps:reps+1, interval, ease, due:now + interval*DAY, last:now};
+}
+const lab = d => d < 1 ? "10 min" : d === 1 ? "1 day" : d + " days";
+
+/* ---------- exam planning ---------- */
+const examTs = () => new Date(S.exam.date + "T23:59:00").getTime();
+const daysLeft = () => Math.ceil((examTs() - Date.now()) / DAY);
+function readiness(){
+  if (!S.exam || !S.cards.length) return 0;
+  const ex = examTs(); let sum = 0;
+  for (const c of S.cards){
+    if (c.last == null) continue;
+    const I = Math.max(c.interval, .5), t = Math.max(0, (ex - c.last) / DAY);
+    sum += Math.pow(.9, t / I);
+  }
+  return Math.round(sum / S.cards.length * 100);
+}
+const readyLabel = p => p >= 85 ? "Exam ready" : p >= 65 ? "On track" : p >= 35 ? "Building" : "Just starting";
+function dayState(){
+  const k = todayKey();
+  if (!S.day || S.day.d !== k){
+    const unseen = S.cards.filter(c => c.last == null).length; let quota = 10;
+    if (S.exam){ const dl = daysLeft(); if (dl >= 0) quota = Math.min(40, Math.max(1, Math.ceil(unseen / Math.max(1, dl)))); }
+    S.day = {d:k, quota, done:0}; save();
+  }
+  return S.day;
+}
+function queue(){
+  const ds = dayState(), rem = Math.max(0, ds.quota - ds.done);
+  const rev = S.cards.filter(c => c.last != null && c.due <= Date.now()).sort((a,b) => a.due - b.due);
+  const nw = S.cards.filter(c => c.last == null).slice(0, rem);
+  return {rev, nw, all:[...rev, ...nw]};
+}
+const streakNow = () => (S.lastStudy === todayKey() || S.lastStudy === ymd(Date.now() - DAY)) ? S.streak : 0;
+
+/* ---------- icons ---------- */
+const MARK = '<svg viewBox="0 0 38 38" aria-hidden="true"><rect width="38" height="38" rx="11" fill="#0B5D36"/><path d="M7 11C10 11 12 19 14 26V14C17 14 18.5 20 20.5 26V17C23.5 17 25 21 31 26" fill="none" stroke="#9BF0C0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const I = {
+  today:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>',
+  lib:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></svg>',
+  src:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11l2 2 4-4"/></svg>',
+  you:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>',  lens:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M8 4h8M5 7l-2 2M19 7l2 2"/></svg>',
+  flame:'<svg width="18" height="18" viewBox="0 0 24 24" fill="#E07B00" stroke="#E07B00" stroke-width="1"><path d="M12 2s5 4.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg>',
+  ext:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  trash:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
+};
+function ring(p){
+  const C = 2 * Math.PI * 52;
+  return `<svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Readiness ${p} percent"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="#9BF0C0" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(p/100*C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 60 60)"/><text x="60" y="62" text-anchor="middle" font-size="30" font-weight="700" fill="#fff" font-family="Georgia,serif">${p}%</text><text x="60" y="80" text-anchor="middle" font-size="9" fill="#B7E8CB" letter-spacing="1.6">READY</text></svg>`;
+}
+
+/* ---------- AI source handoff (no API, no key, no quota) ---------- */
+const AI_APPS = {
+  chatgpt:{name:"ChatGPT", icon:"🤖", url:"https://chatgpt.com/", note:"Open ChatGPT. If you are not signed in, ChatGPT will show its own sign-in screen."},
+  gemini:{name:"Gemini", icon:"✨", url:"https://gemini.google.com/", note:"Open Gemini. If you are not signed in, Gemini will show its own sign-in screen."},
+  claude:{name:"Claude", icon:"🟣", url:"https://claude.ai/", note:"Open Claude. If you are not signed in, Claude will show its own sign-in screen."}
+};
+function copyQuestion(q){
+  const text = String(q || "").trim();
+  if (!text) return Promise.reject(new Error("There is no question to send."));
+  if (navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      ok ? resolve() : reject(new Error("Copy was blocked by the browser."));
+    }catch(e){ reject(e); }
+  });
+}
+async function openAIApp(id){
+  const app = AI_APPS[id];
+  if (!app) return;
+  const q = String(ui.q || "").trim();
+  if (!q) return;
+  ui.aiLoading = true; ui.aiError = ""; ui.aiAnswer = ""; ui.aiCites = [];
+  render();
+  try{
+    await copyQuestion(q);
+    ui.aiLoading = false;
+    ui.msg = `Question copied. Opening ${app.name}…`;
+    render();
+    // Use the normal HTTPS app/site URL. On Android, installed apps may claim
+    // their verified web links; otherwise the browser opens the service.
+    window.location.href = app.url;
+  }catch(err){
+    ui.aiLoading = false;
+    ui.aiError = err?.message || "The question could not be copied.";
+    render();
+  }
+}
+function aiCrossCheckView(){
+  const q = String(ui.q || "").trim();
+  const disabled = !q || ui.aiLoading;
+  return `<article class="res" style="display:block;border-color:var(--brand)">
+    <div class="num" style="font-size:22px">04</div>
+    <div class="nm">AI Assistant</div>
+    <span class="pill">No API key · no Recall quota</span>
+    <p>Ask an AI you already use on your phone. Recall copies the question first, then opens the service. Your login stays inside that AI service.</p>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" data-act="openai" data-ai="chatgpt" ${disabled ? "disabled" : ""}>🤖 Ask ChatGPT</button>
+      <button class="btn ghost" data-act="openai" data-ai="gemini" ${disabled ? "disabled" : ""}>✨ Ask Gemini</button>
+      <button class="btn ghost" data-act="openai" data-ai="claude" ${disabled ? "disabled" : ""}>🟣 Ask Claude</button>
+    </div>
+    ${ui.aiLoading ? `<div class="msg">Copying your question…</div>` : ""}
+    ${ui.aiError ? `<div class="msg" style="color:var(--warn)">${esc(ui.aiError)}</div>` : ""}
+    <div class="note" style="margin-top:10px">If the app is installed, Android may open it; otherwise the service opens in your browser. If you are not logged in, that service will handle sign-in.</div>
+  </article>`;
+}
+
+/* ---------- Lens Insight: visual capture -> action ---------- */
+function stopLensCamera(){
+  if (ui.lensStream){ ui.lensStream.getTracks().forEach(t => t.stop()); ui.lensStream = null; }
+}
+function lensReset(){ stopLensCamera(); ui.lensStage="home"; ui.lensImage=""; ui.lensFile=null; ui.lensError=""; ui.lensBusy=false; ui.lensAIHistory=[]; ui.lensAIQuestion=""; ui.lensAIError=""; ui.lensAILoading=false; ui.lensAIProgress=""; lensVisionRawImage=null; }
+function lensStart(){ ui.lensStage="loading"; ui.lensError=""; render(); setTimeout(()=>{ if (ui.tab === "lens" && ui.lensStage === "loading"){ ui.lensStage="camera"; render(); } }, 1450); }
+async function lensOpenCamera(){
+  ui.lensError="";
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext){
+    try{
+      stopLensCamera();
+      ui.lensStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
+      ui.lensStage="camera-live"; render();
+      const v=document.getElementById("lensVideo"); if(v){ v.srcObject=ui.lensStream; await v.play().catch(()=>{}); }
+      return;
+    }catch(err){ ui.lensError = err?.name === "NotAllowedError" ? "Camera permission was denied. You can still choose a photo below." : "Live camera is unavailable here. Use the camera/photo button below."; }
+  } else {
+    ui.lensError = "Live camera needs a secure browser context. Use the camera/photo button below.";
+  }
+  const input=document.getElementById("lensFile"); if(input) input.click();
+}
+function lensCapture(){
+  const v=document.getElementById("lensVideo");
+  if(!v || !ui.lensStream) return lensOpenCamera();
+  const c=document.createElement("canvas");
+  const max=1600, scale=Math.min(1,max/Math.max(v.videoWidth,v.videoHeight));
+  c.width=Math.max(1,Math.round(v.videoWidth*scale)); c.height=Math.max(1,Math.round(v.videoHeight*scale));
+  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+  c.toBlob(blob=>{ if(blob) lensUseFile(new File([blob],"recall-lens.jpg",{type:"image/jpeg"})); },"image/jpeg",.88);
+}
+function lensUseFile(file){
+  if(!file || !file.type.startsWith("image/")) return;
+  stopLensCamera(); ui.lensFile=file; ui.lensBusy=true; ui.lensError=""; ui.lensAIError=""; ui.lensAIHistory=[]; ui.lensAIQuestion=""; render();
+  const r=new FileReader(); r.onload=()=>{ ui.lensImage=String(r.result||""); ui.lensBusy=false; ui.lensStage="result"; render(); }; r.onerror=()=>{ui.lensBusy=false;ui.lensError="Could not read that image.";render();}; r.readAsDataURL(file);
+}
+
+/* ---------- local on-device vision AI (no API, no account, no per-question quota) ---------- */
+let lensVisionProcessor = null;
+let lensVisionModel = null;
+let lensVisionLoading = null;
+let lensVisionRawImage = null;
+let lensVisionLastProgressAt = 0;
+const LENS_VISION_MODEL = "HuggingFaceTB/SmolVLM-256M-Instruct";
+const LENS_TFJS = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0";
+const LENS_FLAG = "recall:lens:inflight", LENS_SAFE = "recall:lens:safe";
+
+/* A tab that runs out of memory shows Chrome's "Aw, Snap!" page and cannot be caught in code.
+   So we leave a marker while the model works. If the marker is still there on the next launch,
+   the last run crashed and Recall switches itself to a lighter Safe mode. */
+const lensIsSafe = () => { try{ return localStorage.getItem(LENS_SAFE) === "1"; }catch(_){ return false; } };
+const lensMark = on => { try{ on ? localStorage.setItem(LENS_FLAG, String(Date.now())) : localStorage.removeItem(LENS_FLAG); }catch(_){} };
+try{
+  if (localStorage.getItem(LENS_FLAG)){
+    localStorage.setItem(LENS_SAFE, "1"); localStorage.removeItem(LENS_FLAG);
+    ui.lensNotice = "The last on-device run ran out of memory, so Recall switched to Safe mode: smaller image, shorter answers, CPU only.";
+  }
+}catch(_){}
+window.addEventListener("pagehide", () => lensMark(false));
+
+function lensCfg(){
+  const safe = lensIsSafe();
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 6);
+  return {
+    safe, mobile,
+    maxSide: safe ? 640 : 1024,
+    maxTokens: safe ? 100 : (mobile ? 160 : 220),
+    useGPU: !safe && !mobile            // phone GPUs often crash the tab; CPU (WASM) is slower but stable
+  };
+}
+
+// Shrinks the photo BEFORE the model sees it. Full-resolution phone photos are what exhaust memory.
+async function lensPrepareImage(){
+  const {load_image} = await import(LENS_TFJS);
+  const {maxSide} = lensCfg();
+  let src = ui.lensFile;
+  try{
+    const bmp = await createImageBitmap(ui.lensFile, {resizeWidth:maxSide, resizeQuality:"medium"});
+    const k = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    if (bmp.close) bmp.close();
+    src = await new Promise(r => c.toBlob(b => r(b || ui.lensFile), "image/jpeg", .9));
+  }catch(_){ src = ui.lensFile; }
+  return load_image(src);
+}
+
+async function loadLensLocalAI(){
+  if(lensVisionProcessor && lensVisionModel) return {processor:lensVisionProcessor,model:lensVisionModel};
+  if(lensVisionLoading) return lensVisionLoading;
+
+  ui.lensAILoading=true;
+  ui.lensAIError="";
+  ui.lensAIProgress="Loading the on-device vision model for the first time…";
+  ui.lensAIProgressPct=0;
+  render();
+
+  lensVisionLoading=(async()=>{
+    try{
+      const cfg=lensCfg();
+      lensMark(true);
+      const mod=await import(LENS_TFJS);
+      const {AutoProcessor,AutoModelForVision2Seq,load_image,env}=mod;
+
+      env.allowRemoteModels=true;
+      env.allowLocalModels=false;
+      env.useBrowserCache=true;
+      env.useWasmCache=true;
+      env.cacheKey="recall-lens-local-ai-v2";
+      env.logLevel=env.ERROR ?? 40;
+
+      const progress=e=>{
+        if(!ui.lensAILoading) return;
+        const now=Date.now();
+        if(now-lensVisionLastProgressAt<300 && e.status!=="ready") return;
+        lensVisionLastProgressAt=now;
+        const pct=Number.isFinite(e.progress)
+          ? Math.max(0,Math.min(100,Math.round(e.progress)))
+          : ui.lensAIProgressPct;
+        ui.lensAIProgressPct=pct;
+
+        if(e.status==="progress_total") ui.lensAIProgress=`Downloading model: ${pct}%`;
+        else if(e.status==="done") ui.lensAIProgress="Preparing the vision model…";
+        else if(e.file) ui.lensAIProgress=`Preparing ${String(e.file).split("/").pop()}${pct ? ` · ${pct}%` : ""}`;
+        render();
+      };
+
+      // SmolVLM is loaded through the direct multimodal model API.
+      // The pipeline name "image-text-to-text" is not available in the
+      // Transformers.js browser package used here.
+      let device="wasm";
+      let dtype="q4";
+      if(cfg.useGPU && navigator.gpu){
+        try{
+          const adapter=await navigator.gpu.requestAdapter();
+          if(adapter){
+            device="webgpu";
+            dtype=(adapter.features && adapter.features.has("shader-f16")) ? "q4f16" : "q4";
+          }
+        }catch(_){}
+      }
+
+      try{
+        lensVisionProcessor=await AutoProcessor.from_pretrained(LENS_VISION_MODEL,{progress_callback:progress});
+        lensVisionModel=await AutoModelForVision2Seq.from_pretrained(LENS_VISION_MODEL,{
+          device,
+          dtype,
+          progress_callback:progress
+        });
+      }catch(firstErr){
+        if(device==="webgpu"){
+          ui.lensAIProgress="WebGPU model load failed. Trying CPU mode…";
+          ui.lensAIProgressPct=0;
+          render();
+          lensVisionProcessor=await AutoProcessor.from_pretrained(LENS_VISION_MODEL,{progress_callback:progress});
+          lensVisionModel=await AutoModelForVision2Seq.from_pretrained(LENS_VISION_MODEL,{
+            device:"wasm",
+            dtype:"q4",
+            progress_callback:progress
+          });
+        }else{
+          throw firstErr;
+        }
+      }
+
+      lensVisionRawImage=await lensPrepareImage();
+      ui.lensAIReady=true;
+      ui.lensAILoading=false;
+      ui.lensAIProgress="On-device AI is ready. Your questions now run locally on this device.";
+      ui.lensAIProgressPct=100;
+      render();
+      return {processor:lensVisionProcessor,model:lensVisionModel};
+    }catch(err){
+      lensVisionProcessor=null;
+      lensVisionModel=null;
+      ui.lensAILoading=false;
+      const raw=String(err?.message||"");
+      ui.lensAIError=/dynamically imported module|no available backend|blob:/i.test(raw)
+        ? "The on-device AI engine was blocked from starting. Reload the page once and try again. If it still fails, open the app in Chrome over http://localhost or https. Details: "+raw.slice(0,160)
+        : (raw||"The on-device vision model could not be loaded on this device.");
+      ui.lensAIProgress="";
+      ui.lensAIProgressPct=0;
+      render();
+      throw err;
+    }finally{
+      lensVisionLoading=null;
+      lensMark(false);
+    }
+  })();
+
+  return lensVisionLoading;
+}
+
+function lensLocalChatOpen(){
+  if(!ui.lensFile) return;
+  ui.lensStage="local-chat"; ui.lensAIError=""; ui.lensAIQuestion=""; render();
+  loadLensLocalAI().catch(()=>{});
+}
+
+function lensStarter(q){ ui.lensAIQuestion=q; render(); lensAskLocal(); }
+
+async function lensAskLocal(){
+  const q=String(ui.lensAIQuestion||"").trim();
+  if(!q || !ui.lensFile) return;
+  if(ui.lensAILoading) return;
+
+  ui.lensAIError="";
+  ui.lensAIHistory.push({role:"user",text:q});
+  ui.lensAIQuestion="";
+  ui.lensAILoading=true;
+  ui.lensAIProgress="Thinking on this device…";
+  render();
+
+  try{
+    const {processor,model}=await loadLensLocalAI();
+    ui.lensAILoading=true; // keep the guard on during generation so a second tap can't start a parallel run
+
+    if(!lensVisionRawImage) lensVisionRawImage=await lensPrepareImage();
+    const cfg=lensCfg();
+
+    const prior=ui.lensAIHistory
+      .slice(0,-1)
+      .slice(-6)
+      .map(x=>`${x.role==="user"?"User":"Recall AI"}: ${x.text}`)
+      .join("\n");
+
+    const prompt=`You are Recall Lens, a private on-device visual study and problem-solving assistant. Analyze the supplied image carefully. Answer the user's question directly and simply. If the image contains a study problem, explain or solve it step by step. If text is visible, transcribe only the relevant parts before reasoning. Do not claim certainty when the image is unclear.
+${prior ? "Previous conversation:\n"+prior+"\n\n" : ""}Current user question: ${q}`;
+
+    const messages=[{
+      role:"user",
+      content:[
+        {type:"image"},
+        {type:"text",text:prompt}
+      ]
+    }];
+
+    lensMark(true);
+    await new Promise(r=>setTimeout(r,60)); // let the "Thinking…" state paint before the heavy work starts
+    const text=processor.apply_chat_template(messages,{add_generation_prompt:true});
+    // do_image_splitting:false = one 512px view of the image instead of up to ~17 tiles (the cause of the crash)
+    const inputs=await processor(text,[lensVisionRawImage],{do_image_splitting:false});
+
+    const outputIds=await model.generate({
+      ...inputs,
+      max_new_tokens:cfg.maxTokens,
+      do_sample:false,
+      repetition_penalty:1.05
+    });
+
+    const decode=ids=>String(processor.batch_decode(ids,{skip_special_tokens:true})?.[0]||"").trim();
+    let answer="";
+    try{
+      const promptLen=inputs.input_ids?.dims?.at?.(-1);
+      if(promptLen) answer=decode(outputIds.slice(null,[promptLen,null]));
+    }catch(_){ answer=""; }
+
+    // Fallback: if slicing was not possible, decode everything and keep the assistant part.
+    if(!answer){
+      answer=decode(outputIds);
+      const assistantMarkers=["Assistant:","assistant\n","<|assistant|>"];
+      for(const marker of assistantMarkers){
+        const idx=answer.lastIndexOf(marker);
+        if(idx>=0){
+          const candidate=answer.slice(idx+marker.length).trim();
+          if(candidate){ answer=candidate; break; }
+        }
+      }
+    }
+
+    answer=answer || "I couldn't produce an answer from this image.";
+    ui.lensAIHistory.push({role:"assistant",text:answer});
+  }catch(err){
+    ui.lensAIError=err?.message||"The local AI could not analyze this image.";
+    if(ui.lensAIHistory.at(-1)?.role==="user") ui.lensAIHistory.pop();
+  }finally{
+    lensMark(false);
+    ui.lensAILoading=false;
+    ui.lensAIProgress="";
+    render();
+  }
+}
+
+const LENS_NO_ANSWER = "I couldn't produce an answer from this image.";
+const lensCanCheck = t => { t = String(t||"").trim(); return t.length >= 20 && t !== LENS_NO_ANSWER; };
+// Turns the AI's reply into a short search question (its first real sentence, ~140 chars).
+function lensQueryFromAnswer(t){
+  const clean = String(t||"").replace(/[*_`#>]+/g," ").replace(/\b(step|answer)\s*\d*\s*[:.)-]\s*/gi,"").replace(/\s+/g," ").trim();
+  const sentences = clean.match(/[^.!?\n]+[.!?]?/g) || [clean];
+  let q = (sentences.find(x => x.trim().length >= 25) || sentences[0] || clean).trim();
+  if (q.length > 140){ q = q.slice(0,140); const i = q.lastIndexOf(" "); if (i > 60) q = q.slice(0,i); }
+  return q.replace(/[.!?]+$/,"").trim();
+}
+function lensCheckInSources(i){
+  const m = ui.lensAIHistory[i]; if (!m || m.role === "user" || !lensCanCheck(m.text)) return;
+  const q = lensQueryFromAnswer(m.text); if (!q) return;
+  ui.fromLens = true; ui.lensCheckText = m.text; ui.tab = "src"; ui.reviewing = false; ui.msg = "";
+  find(q);
+}
+function lensLocalResetChat(){ ui.lensAIHistory=[]; ui.lensAIQuestion=""; ui.lensAIError=""; render(); }
+
+async function lensShare(){
+  if(!ui.lensFile) return;
+  const prompt="Analyze this image for me. Identify what is important, explain it simply, and turn it into useful next steps. If it contains study material, solve or explain it step by step. If it contains a document, extract the important information and tell me what action I should take next.";
+  try{
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[ui.lensFile]}))){
+      await navigator.share({title:"Recall Lens",text:prompt,files:[ui.lensFile]});
+      ui.msg="Image shared. Your selected app can analyze it."; render(); return;
+    }
+    await copyQuestion(prompt);
+    ui.msg="Your analysis prompt was copied. This browser cannot share the image directly, so attach the captured image in your AI app."; render();
+  }catch(err){ if(err?.name !== "AbortError"){ui.lensError="The share sheet could not open. You can save the image or try again.";render();} }
+}
+function lensDownload(){
+  if(!ui.lensImage) return;
+  const a=document.createElement("a"); a.href=ui.lensImage; a.download="recall-lens-"+todayKey()+".jpg"; document.body.appendChild(a); a.click(); a.remove();
+  ui.msg="Image saved/downloaded from Recall."; render();
+}
+function lensSaveVisual(){
+  if(!ui.lensImage) return;
+  try{
+    const key="recall:lens-captures:v1", arr=JSON.parse(localStorage.getItem(key)||"[]");
+    arr.unshift({id:uid(),date:new Date().toISOString(),image:ui.lensImage});
+    while(arr.length>3) arr.pop();
+    localStorage.setItem(key,JSON.stringify(arr));
+    ui.msg="Saved locally as a visual capture. (Kept to a few images to protect phone storage.)"; render();
+  }catch(e){ui.msg="Phone storage is full for visual captures. Download the image instead.";render();}
+}
+function viewLens(){
+  if(ui.lensStage === "loading") return `<div class="lens-shell"><div class="lens-hero" style="min-height:calc(100vh - 120px);display:flex;flex-direction:column;justify-content:center;text-align:center"><div class="lens-orbit"><div class="lens-hole"></div><div class="lens-astronaut">👨‍🚀</div></div><div class="lens-kicker">RECALL LENS</div><div class="lens-title" style="font-size:26px">Entering visual space…</div><div class="lens-loading">Preparing your camera <span class="lens-dots"><i></i><i></i><i></i></span></div></div></div>`;
+  if(ui.lensStage === "camera" || ui.lensStage === "camera-live") return `<div class="lens-shell"><button class="lens-back" data-act="lensback">← Back to Lens</button><div class="lens-hero"><span class="lens-badge">VISUAL CAPTURE</span><div class="lens-title" style="font-size:27px;margin-top:10px">Capture what you're looking at.</div><p class="lens-sub">Notes, questions, diagrams, forms, receipts or anything you want to understand and act on.</p>
+    <div class="lens-camera">${ui.lensStage === "camera-live" ? `<video id="lensVideo" playsinline muted></video><div class="guide"></div><div class="corner"></div>` : `<div style="height:100%;display:grid;place-items:center;color:#777">Camera ready</div>`}</div>
+    ${ui.lensStage === "camera-live" ? `<button class="btn" style="margin-top:12px;background:#B88CFF;color:#08050D" data-act="lenscapture">● Capture image</button>` : `<button class="btn" style="margin-top:12px;background:#B88CFF;color:#08050D" data-act="lenscamera">Open camera</button>`}
+    <input id="lensFile" class="lens-hidden" type="file" accept="image/*" capture="environment">
+    <button class="btn ghost" style="margin-top:9px;border-color:#3A3048" data-act="lenspick">Choose photo / camera</button>
+    ${ui.lensError ? `<div class="msg" style="color:#FF9FAD">${esc(ui.lensError)}</div>` : ""}
+    <div class="lens-mini">Your camera is requested only after you choose this feature. Recall does not upload the image by itself.</div></div></div>`;
+  if(ui.lensStage === "local-chat") return `<div class="lens-shell"><button class="lens-back" data-act="lenschatback">← Back to image</button><div class="lens-hero"><span class="lens-badge">PRIVATE · ON-DEVICE AI</span><div class="lens-title" style="font-size:27px">Ask your image anything.</div><p class="lens-sub">The vision model runs in this browser on your device. No Recall API key, account, or per-question cloud quota.</p><img class="lens-preview" src="${esc(ui.lensImage)}" alt="Captured image preview">
+    <div class="lens-local"><div class="lens-local-head"><div class="ico">◎</div><div><b>Recall Local Vision</b><span>${ui.lensAIReady ? "Model loaded · questions run locally" : ui.lensAILoading ? "Preparing the model…" : "Ready to load on this device"}</span></div></div>
+    ${ui.lensAIProgress ? `<div class="lens-ai-progress">${esc(ui.lensAIProgress)}${ui.lensAIProgressPct ? `<div class="bar"><div class="fill" style="width:${ui.lensAIProgressPct}%"></div></div>` : ""}</div>` : ""}
+    ${ui.lensAIError ? `<div class="msg" style="color:#FF9FAD">${esc(ui.lensAIError)}</div>` : ""}
+    ${ui.lensAIError && !ui.lensAILoading && !ui.lensAIReady ? `<button class="btn ghost" style="margin-top:10px;border-color:#3A3048" data-act="lensretry">Try loading the model again</button>` : ""}
+    ${lensIsSafe() ? `<div class="msg" style="color:#E7D7FF">${esc(ui.lensNotice||"Safe mode is on: smaller image, shorter answers, CPU only.")} <button class="btn ghost" style="margin-top:8px;border-color:#3A3048" data-act="lensfast">Switch back to normal mode</button></div>` : ""}
+    <div class="lens-starters"><button data-act="lensstarter" data-q="Explain this image simply.">Explain it</button><button data-act="lensstarter" data-q="Solve the problem in this image step by step.">Solve it</button><button data-act="lensstarter" data-q="Read and extract the important text from this image.">Extract text</button></div>
+    <div class="lens-chat">${ui.lensAIHistory.map((m,i)=>`<div class="lens-chat-msg ${m.role==="user"?"user":"ai"}"><div class="lens-chat-label">${m.role==="user"?"You":"Recall Local Vision"}</div>${esc(m.text)}${m.role!=="user"&&lensCanCheck(m.text)?`<div><button class="lens-check" data-act="lenscheck" data-i="${i}">🔎 Check this answer in Sources</button></div>`:""}</div>`).join("")}</div>
+    <div class="lens-chat-form"><textarea id="lensAIQuestion" class="lens-chat-input" rows="2" placeholder="Ask a question about this image…" ${ui.lensAILoading?"disabled":""}>${esc(ui.lensAIQuestion)}</textarea><button class="lens-chat-send" data-act="lensask" ${ui.lensAILoading?"disabled":""}>${ui.lensAILoading?"…":"Ask"}</button></div>
+    <div class="lens-mini">First use downloads the small vision model to the browser and caches it. After that, image questions are processed locally, so there is no provider message quota. Device RAM, battery, heat and browser storage still limit practical use.</div>
+    <button class="btn ghost" style="margin-top:10px;border-color:#3A3048" data-act="lenschatreset">Clear this chat</button></div>
+    </div></div>`;
+  if(ui.lensStage === "result") return `<div class="lens-shell"><button class="lens-back" data-act="lensback">← Capture another</button><div class="lens-hero"><span class="lens-badge">CAPTURE COMPLETE</span><div class="lens-title" style="font-size:27px">Now turn the image into action.</div><p class="lens-sub">This is the useful layer: hand the exact image to an AI for explanation, extraction, solving or next-step planning.</p><img class="lens-preview" src="${esc(ui.lensImage)}" alt="Captured image preview">
+    <div class="lens-panel"><h3>What do you want to do?</h3><p>Choose the outcome instead of just storing another photo.</p>
+      <button class="lens-action" data-act="lenslocal"><div class="ico">◎</div><div><b>Ask unlimited questions on this device</b><span>Load Recall Local Vision once, then chat about this image without an AI API quota.</span></div><strong>›</strong></button>
+      <button class="lens-action" data-act="lensshare"><div class="ico">✦</div><div><b>Understand / solve with AI</b><span>Share the image to ChatGPT, Gemini, Claude or another compatible app.</span></div><strong>›</strong></button>
+      <button class="lens-action" data-act="lenssave"><div class="ico">▣</div><div><b>Save as a visual capture</b><span>Keep a small local copy inside Recall for later reference.</span></div><strong>›</strong></button>
+      <button class="lens-action" data-act="lensdownload"><div class="ico">↓</div><div><b>Save to device</b><span>Download the captured image to your phone.</span></div><strong>›</strong></button>
+    </div>
+    ${ui.msg ? `<div class="lens-result"><b>${esc(ui.msg)}</b><p>Recall keeps the handoff under your control.</p></div>` : ""}
+    ${ui.lensError ? `<div class="msg" style="color:#FF9FAD">${esc(ui.lensError)}</div>` : ""}
+    <div class="lens-mini"><b>Why this matters:</b> a camera alone is just capture. Lens is designed around the next decision — understand it, solve it, extract what matters, or act on it.</div></div></div>`;
+  return `<div class="lens-shell"><div class="lens-hero"><span class="lens-badge">NEW · RECALL LENS</span><div class="lens-orbit"><div class="lens-hole"></div><div class="lens-astronaut">👨‍🚀</div></div><div class="lens-kicker">VISUAL PROBLEM SOLVER</div><div class="lens-title">Point. Capture. Act.</div><p class="lens-sub">Turn something you can see into something you can understand and do something about.</p><button class="btn" style="margin-top:18px;background:#B88CFF;color:#08050D" data-act="lensstart">Enter Lens</button></div>
+    <div class="lens-panel"><h3>Built for real-world friction</h3><p>Capture a confusing page, handwritten note, diagram, question, form, receipt or document — then send it directly into an AI workflow instead of retyping everything.</p></div>
+    <div class="lens-panel"><span class="lens-badge">Privacy by design</span><p style="margin-top:8px">Camera access happens only after you ask. The capture stays in the browser. You can analyze it locally on-device, or share it externally only when you choose that action.</p></div></div>`;
+}
+
+/* ---------- Motion Studio: dots -> 2D / 3D animation (runs on this device, free) ---------- */
+const STUDIO_KEY = "recall:studio:v1";
+const ST_COLORS = ["#3DF5C6","#7AA2FF","#FF6BD6","#FFD23F","#FF7A59","#FFFFFF"];
+const ST_ACTORS = {"2d":[["ball","Ball"],["square","Square"],["star","Star"],["arrow","Arrow"]], "3d":[["sphere","Sphere"],["cube","Cube"]]};
+const stDefault = () => ({mode:"2d", actor2:"ball", actor3:"sphere", color:ST_COLORS[0], trail:true, loop:true, closed:false, smooth:true, spin:false, wm:true, speed:1, caption:"", tool:"dots", seen:false,
+  d2:{kind:"dots", dots:[], drawn:[]}, d3:{kind:"dots", dots:[], drawn:[]}, cam:{yaw:.6, pitch:.5, h:.3}});
+let ST = stDefault();
+try{
+  const raw = JSON.parse(localStorage.getItem(STUDIO_KEY) || "null");
+  if (raw && typeof raw === "object") ST = Object.assign(ST, raw,
+    {d2:Object.assign({kind:"dots", dots:[], drawn:[]}, raw.d2 || {}), d3:Object.assign({kind:"dots", dots:[], drawn:[]}, raw.d3 || {}), cam:Object.assign({yaw:.6, pitch:.5, h:.3}, raw.cam || {})});
+}catch(_){}
+const stSave = () => { try{ localStorage.setItem(STUDIO_KEY, JSON.stringify(ST)); }catch(_){} };
+const stx = {t:0, playing:false, v:0, track:null, trackV:-1, trackA:0, drag:null, rec:null, recT0:0, aspect:1, W:300, H:400, raf:0, last:0, yawOff:0, spinT:0,
+  exporting:false, finishing:false, recorder:null, exportUrl:"", exportBlob:null, exportExt:"webm", exportMsg:""};
+const stData = () => ST.mode === "3d" ? ST.d3 : ST.d2;
+const stTouch = () => { stx.v++; stSave(); };
+
+/* ST-PURE-START */
+function stCR(p0, p1, p2, p3, t){
+  const t2 = t*t, t3 = t2*t;
+  const f = (a, b, c, d) => .5 * ((2*b) + (-a + c)*t + (2*a - 5*b + 4*c - d)*t2 + (-a + 3*b - 3*c + d)*t3);
+  return {x:f(p0.x, p1.x, p2.x, p3.x), y:f(p0.y, p1.y, p2.y, p3.y), z:f(p0.z||0, p1.z||0, p2.z||0, p3.z||0)};
+}
+function stSplinePts(dots, closed){
+  const n = dots.length; if (n < 2) return [];
+  const get = i => closed ? dots[(i % n + n) % n] : dots[Math.max(0, Math.min(n - 1, i))];
+  const out = [], segs = closed ? n : n - 1;
+  for (let i = 0; i < segs; i++){
+    const p0 = get(i - 1), p1 = get(i), p2 = get(i + 1), p3 = get(i + 2);
+    for (let k = 0; k < 24; k++) out.push(stCR(p0, p1, p2, p3, k / 24));
+  }
+  const last = closed ? dots[0] : dots[n - 1];
+  out.push({x:last.x, y:last.y, z:last.z || 0});
+  return out;
+}
+function stBuildTrack(){
+  const d = stData(), is3 = ST.mode === "3d", A = is3 ? 1 : (stx.aspect || 1);
+  if (d.kind === "draw" && d.drawn.length >= 2){
+    const pts = d.drawn.map(p => ({x:p.x, y:p.y, z:p.z || 0, t:p.t / 1000}));
+    return {kind:"draw", pts, dur:Math.max(.2, pts[pts.length - 1].t), smooth:false};
+  }
+  if (d.dots.length < 2) return null;
+  const sp = stSplinePts(d.dots, ST.closed), cum = [0]; let L = 0;
+  for (let i = 1; i < sp.length; i++){ const a = sp[i-1], b = sp[i]; L += Math.hypot((b.x - a.x)*A, b.y - a.y, (b.z||0) - (a.z||0)); cum.push(L); }
+  const base = is3 ? .9 : .45;
+  return {kind:"dots", pts:sp, cum, L, dur:Math.max(.4, L / base), smooth:!!ST.smooth && !ST.closed};
+}
+function stPosAt(tr, t){
+  if (!tr) return null;
+  t = Math.max(0, Math.min(tr.dur, t));
+  if (tr.kind === "draw"){
+    const p = tr.pts; let lo = 0, hi = p.length - 1;
+    while (hi - lo > 1){ const m = (lo + hi) >> 1; if (p[m].t <= t) lo = m; else hi = m; }
+    const a = p[lo], b = p[hi], u = Math.max(0, Math.min(1, (t - a.t) / Math.max(1e-6, b.t - a.t)));
+    return {x:a.x + (b.x - a.x)*u, y:a.y + (b.y - a.y)*u, z:(a.z||0) + ((b.z||0) - (a.z||0))*u};
+  }
+  let u = t / tr.dur; if (tr.smooth) u = u*u*(3 - 2*u);
+  const target = u * tr.L, c = tr.cum; let lo = 0, hi = c.length - 1;
+  while (hi - lo > 1){ const m = (lo + hi) >> 1; if (c[m] <= target) lo = m; else hi = m; }
+  const a = tr.pts[lo], b = tr.pts[hi], f = Math.max(0, Math.min(1, (target - c[lo]) / Math.max(1e-9, c[hi] - c[lo])));
+  return {x:a.x + (b.x - a.x)*f, y:a.y + (b.y - a.y)*f, z:(a.z||0) + ((b.z||0) - (a.z||0))*f};
+}
+function stProject(p, W, H, cam, yawOff){
+  const yaw = cam.yaw + (yawOff || 0), cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  const vx = p.x, vy = p.y - .3, vz = p.z || 0;
+  const x1 = vx*cy - vz*sy, z1 = vx*sy + vz*cy, y1 = vy;
+  const y2 = y1*cp - z1*sp, z2 = y1*sp + z1*cp, x2 = x1;
+  const D = 3.2, F = Math.min(W, H) * 1.15, zc = Math.max(.3, z2 + D), s = F / zc;
+  return {x:W/2 + x2*s, y:H/2 - y2*s + H*.04, s, depth:zc};
+}
+function stUnproject(sx, sy, W, H, cam, h, yawOff){
+  const yaw = cam.yaw + (yawOff || 0), cy = Math.cos(yaw), sy_ = Math.sin(yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  const D = 3.2, F = Math.min(W, H) * 1.15;
+  const dx = (sx - W/2) / F, dy = -((sy - H*.04) - H/2) / F, dz = 1;
+  const den = dy*cp + dz*sp; if (Math.abs(den) < 1e-4) return null;
+  const t = (h - .3 + D*sp) / den; if (!(t > 0)) return null;
+  const x2 = t*dx, y2 = t*dy, z2 = t*dz - D;
+  const y1 = y2*cp + z2*sp, z1 = -y2*sp + z2*cp, x1 = x2;
+  const x = x1*cy + z1*sy_, z = -x1*sy_ + z1*cy;
+  return {x:Math.max(-1.3, Math.min(1.3, x)), y:h, z:Math.max(-1.3, Math.min(1.3, z))};
+}
+function stShade(hex){
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return "rgb(" + Math.round(r*.3) + "," + Math.round(g*.3) + "," + Math.round(b*.3) + ")";
+}
+/* ST-PURE-END */
+
+const stScreen = p => ST.mode === "3d" ? stProject(p, stx.W, stx.H, ST.cam, stx.yawOff) : {x:p.x * stx.W, y:p.y * stx.H, s:1, depth:1};
+const stWorld = (px, py, h) => ST.mode === "3d"
+  ? stUnproject(px, py, stx.W, stx.H, ST.cam, h == null ? ST.cam.h : h, stx.yawOff)
+  : {x:Math.max(0, Math.min(1, px / stx.W)), y:Math.max(0, Math.min(1, py / stx.H)), z:0};
+
+function stEnsureTrack(){
+  const need = stx.trackV !== stx.v || (ST.mode === "2d" && Math.abs(stx.trackA - stx.aspect) > .02);
+  if (need){
+    stx.track = stBuildTrack(); stx.trackV = stx.v; stx.trackA = stx.aspect;
+    if (stx.track) stx.t = Math.min(stx.t, stx.track.dur); else { stx.t = 0; stx.playing = false; }
+  }
+  return stx.track;
+}
+function stHeading(tr, t){
+  const a = stScreen(stPosAt(tr, Math.max(0, t - .02))), b = stScreen(stPosAt(tr, Math.min(tr.dur, t + .02)));
+  return Math.atan2(b.y - a.y, b.x - a.x);
+}
+function stDrawActor(g, tr, t){
+  const p = stPosAt(tr, t), s = stScreen(p), is3 = ST.mode === "3d", col = ST.color, actor = is3 ? ST.actor3 : ST.actor2;
+  const k = is3 ? s.s / (Math.min(stx.W, stx.H) * 1.15 / 3.2) : 1, R = 15 * k;
+  g.save();
+  if (is3){
+    const gs = stScreen({x:p.x, y:0, z:p.z}); g.fillStyle = "rgba(255,255,255,.09)"; g.beginPath(); g.ellipse(gs.x, gs.y, R*1.15, R*.4, 0, 0, 7); g.fill();
+  }
+  g.shadowColor = col; g.shadowBlur = 20;
+  if (actor === "ball" || actor === "sphere"){
+    const gr = g.createRadialGradient(s.x - R*.35, s.y - R*.35, R*.1, s.x, s.y, R);
+    gr.addColorStop(0, "#fff"); gr.addColorStop(.25, col); gr.addColorStop(1, stShade(col));
+    g.fillStyle = gr; g.beginPath(); g.arc(s.x, s.y, R, 0, 7); g.fill();
+  } else if (actor === "cube"){
+    const h = .075, a = t*1.4, b = .5 + t*.9, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), V = [];
+    for (let i = 0; i < 8; i++){
+      const vx = (i & 1 ? 1 : -1)*h, vy = (i & 2 ? 1 : -1)*h, vz = (i & 4 ? 1 : -1)*h;
+      const x1 = vx*ca + vz*sa, z1 = -vx*sa + vz*ca, y1 = vy*cb - z1*sb, z2 = vy*sb + z1*cb;
+      V.push(stProject({x:p.x + x1, y:p.y + y1, z:p.z + z2}, stx.W, stx.H, ST.cam, stx.yawOff));
+    }
+    g.strokeStyle = col; g.lineWidth = 2.2; g.lineJoin = "round"; g.beginPath();
+    for (let i = 0; i < 8; i++) for (const bit of [1, 2, 4]) if (!(i & bit)){ const j = i | bit; g.moveTo(V[i].x, V[i].y); g.lineTo(V[j].x, V[j].y); }
+    g.stroke();
+  } else {
+    g.translate(s.x, s.y); g.rotate(actor === "star" ? t*3 : stHeading(tr, t)); g.fillStyle = col; g.beginPath();
+    if (actor === "square"){ g.rect(-R*.9, -R*.9, R*1.8, R*1.8); }
+    else if (actor === "arrow"){ g.moveTo(R*1.4, 0); g.lineTo(-R*.9, R*.85); g.lineTo(-R*.4, 0); g.lineTo(-R*.9, -R*.85); g.closePath(); }
+    else { for (let i = 0; i < 10; i++){ const rr = i % 2 ? R*.5 : R*1.2, an = -Math.PI/2 + i*Math.PI/5; g.lineTo(Math.cos(an)*rr, Math.sin(an)*rr); } g.closePath(); }
+    g.fill();
+  }
+  g.restore();
+}
+function stLine(g, pts, close){
+  g.beginPath();
+  pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y));
+  if (close) g.closePath();
+  g.stroke();
+}
+function stDraw(cv, ts){
+  const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.max(10, r.width), H = Math.max(10, r.height);
+  const bw = Math.round(W*dpr), bh = Math.round(H*dpr);
+  if (cv.width !== bw || cv.height !== bh){ cv.width = bw; cv.height = bh; }
+  stx.W = W; stx.H = H; stx.aspect = W / H;
+  const dt = stx.last ? Math.min(.1, (ts - stx.last) / 1000) : 0; stx.last = ts;
+  const is3 = ST.mode === "3d";
+  if (is3 && ST.spin) stx.spinT += dt*.45;
+  stx.yawOff = is3 && ST.spin ? stx.spinT : 0;
+
+  const tr = stEnsureTrack();
+  if (tr && stx.playing){
+    stx.t += dt * ST.speed;
+    if (stx.t >= tr.dur){ if (ST.loop && !stx.exporting) stx.t %= tr.dur; else { stx.t = tr.dur; stx.playing = false; } }
+  }
+  const dr = stx.drag;
+  if (dr && dr.type === "draw" && dr.last){ const now = performance.now(); if (now - dr.ls >= 30){ stx.rec.push({x:dr.last.x, y:dr.last.y, z:dr.last.z || 0, t:now - stx.recT0}); dr.ls = now; } }
+  if (stx.exporting && !stx.playing && !stx.finishing && stx.recorder){
+    stx.finishing = true; const rc = stx.recorder; setTimeout(() => { try{ rc.stop(); }catch(_){} }, 300);
+  }
+
+  const clean = stx.exporting, col = ST.color, d = stData(), g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+  g.lineCap = "round"; g.lineJoin = "round";
+
+  if (is3){
+    g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 1;
+    for (let i = -4; i <= 4; i++){
+      const v = i*.3;
+      stLine(g, [stScreen({x:v, y:0, z:-1.2}), stScreen({x:v, y:0, z:1.2})]);
+      stLine(g, [stScreen({x:-1.2, y:0, z:v}), stScreen({x:1.2, y:0, z:v})]);
+    }
+  } else if (!clean){
+    g.fillStyle = "rgba(255,255,255,.07)";
+    for (let x = 14; x < W; x += 28) for (let y = 14; y < H; y += 28) g.fillRect(x, y, 1.5, 1.5);
+  }
+
+  if (dr && dr.type === "draw" && stx.rec && stx.rec.length > 1){
+    g.strokeStyle = col; g.lineWidth = 3; g.globalAlpha = .9; stLine(g, stx.rec.map(stScreen)); g.globalAlpha = 1;
+  }
+  if (tr && !clean){
+    g.strokeStyle = "#2C343A"; g.lineWidth = 2; g.setLineDash([4, 7]); stLine(g, tr.kind === "draw" ? tr.pts.map(stScreen) : tr.pts.map(stScreen), ST.closed && tr.kind === "dots"); g.setLineDash([]);
+  }
+  if (!clean && d.kind === "dots"){
+    d.dots.forEach((p, i) => {
+      const s = stScreen(p), k = is3 ? s.s / (Math.min(W, H) * 1.15 / 3.2) : 1;
+      if (is3){
+        const gs = stScreen({x:p.x, y:0, z:p.z}); g.strokeStyle = "rgba(255,255,255,.18)"; g.lineWidth = 1; g.setLineDash([2, 4]); stLine(g, [gs, s]); g.setLineDash([]);
+        g.fillStyle = "rgba(255,255,255,.12)"; g.beginPath(); g.arc(gs.x, gs.y, 3*k, 0, 7); g.fill();
+      }
+      const rr = 9*k;
+      g.fillStyle = "#050607"; g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(s.x, s.y, rr, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = col; g.font = "700 " + Math.max(8, 10*k) + "px system-ui,sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(i + 1), s.x, s.y + .5);
+    });
+  }
+  if (tr && ST.trail && stx.t > .001){
+    const n = Math.min(160, 8 + Math.floor(stx.t / tr.dur * 160)), pts = [];
+    for (let i = 0; i <= n; i++) pts.push(stScreen(stPosAt(tr, stx.t * i / n)));
+    g.save(); g.strokeStyle = col; g.lineWidth = 3.2; g.shadowColor = col; g.shadowBlur = 14; g.globalAlpha = .9; stLine(g, pts); g.restore();
+  }
+  if (tr) stDrawActor(g, tr, stx.t);
+
+  const empty = !d.dots.length && !d.drawn.length;
+  if (empty && !clean && !(dr && dr.type === "draw")){
+    g.fillStyle = "#8A949A"; g.font = "600 15px system-ui,sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    const lines = ST.tool === "draw" ? ["Drag your finger to draw a path.", "It replays exactly as you drew it."] : ["Tap to place dots.", "Then press Play."];
+    lines.forEach((ln, i) => g.fillText(ln, W/2, H/2 - 10 + i*22));
+  }
+  if (ST.caption){
+    g.save(); let fs = 15; g.font = "700 " + fs + "px system-ui,sans-serif";
+    const tw = g.measureText(ST.caption).width; if (tw > W - 32){ fs = Math.max(10, Math.floor(15 * (W - 32) / tw)); g.font = "700 " + fs + "px system-ui,sans-serif"; }
+    g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#fff"; g.fillText(ST.caption, W/2, H - 26); g.restore();
+  }
+  if (clean && ST.wm){ g.save(); g.fillStyle = "rgba(255,255,255,.55)"; g.font = "600 11px system-ui,sans-serif"; g.textAlign = "right"; g.textBaseline = "top"; g.fillText("Made with Recall", W - 12, 10); g.restore(); }
+
+  const dur = tr ? tr.dur : 0;
+  const sl = document.getElementById("studioScrub"); if (sl && document.activeElement !== sl) sl.value = dur ? Math.round(Math.min(1, stx.t / dur) * 1000) : 0;
+  const tl = document.getElementById("studioTime"); if (tl){ const tx = dur ? stx.t.toFixed(1) + " / " + dur.toFixed(1) + " s" : "Add 2+ dots"; if (tl.textContent !== tx) tl.textContent = tx; }
+  const pb = document.getElementById("studioPlay"); if (pb){ const tx = stx.playing ? "❚❚ Pause" : "▶ Play"; if (pb.textContent !== tx) pb.textContent = tx; }
+}
+function stLoop(ts){
+  stx.raf = 0;
+  if (ui.tab !== "studio") return;
+  const cv = document.getElementById("studioCanvas");
+  if (cv){ try{ stDraw(cv, ts); }catch(err){ console.error(err); } }
+  stx.raf = requestAnimationFrame(stLoop);
+}
+function stEnsureLoop(){ if (!stx.raf && ui.tab === "studio"){ stx.last = 0; stx.raf = requestAnimationFrame(stLoop); } }
+
+/* ---- templates ---- */
+const stRing = (n, cx, cy, rx, ry) => [...Array(n)].map((_, i) => ({x:cx + rx*Math.cos(i/n*2*Math.PI), y:cy + ry*Math.sin(i/n*2*Math.PI), z:0}));
+const ST_TPL = {
+  "2d":[
+    ["Orbit", () => ({closed:true, dots:stRing(10, .5, .5, .3, .26)})],
+    ["Arc", () => ({closed:false, dots:[...Array(7)].map((_, i) => { const u = i/6; return {x:.1 + .8*u, y:.85 - 2.2*u*(1 - u), z:0}; })})],
+    ["Wave", () => ({closed:false, dots:[...Array(9)].map((_, i) => ({x:.08 + .84*i/8, y:.5 + .22*Math.sin(i*1.35), z:0}))})],
+    ["Infinity", () => ({closed:true, dots:[...Array(10)].map((_, i) => { const a = i/10*2*Math.PI, q = 1 + Math.sin(a)**2; return {x:.5 + .38*Math.cos(a)/q, y:.5 + .34*Math.sin(a)*Math.cos(a)/q*1.6, z:0}; })})]
+  ],
+  "3d":[
+    ["Orbit", () => ({closed:true, dots:[...Array(9)].map((_, i) => { const a = i/9*2*Math.PI; return {x:.8*Math.cos(a), y:.35, z:.8*Math.sin(a)}; })})],
+    ["Helix", () => ({closed:false, dots:[...Array(14)].map((_, i) => { const a = i*.75; return {x:.6*Math.cos(a), y:.05 + i/13*.9, z:.6*Math.sin(a)}; })})],
+    ["Zigzag", () => ({closed:false, dots:[{x:-.9, y:.1, z:-.9}, {x:.9, y:.3, z:-.5}, {x:-.9, y:.5, z:-.1}, {x:.9, y:.7, z:.3}, {x:-.9, y:.9, z:.7}, {x:.9, y:.4, z:.9}]})]
+  ]
+};
+function stApplyTemplate(i){
+  const t = ST_TPL[ST.mode][i]; if (!t) return;
+  const o = t[1](), d = stData();
+  d.kind = "dots"; d.dots = o.dots; d.drawn = []; ST.closed = !!o.closed; stx.t = 0; stx.playing = true; stTouch();
+}
+function stEnter(){
+  if (!ST.seen){ ST.seen = true; ST.mode = "2d"; stApplyTemplate(3); }
+  stEnsureLoop();
+}
+
+/* ---- pointer input: tap = dot, drag dot = move, Draw tool = record the drag with its timing ---- */
+document.addEventListener("pointerdown", e => {
+  const cv = e.target; if (!cv || cv.id !== "studioCanvas" || stx.exporting || stx.drag) return;
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  e.preventDefault(); try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+  const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top, d = stData(), is3 = ST.mode === "3d";
+  stx.W = r.width; stx.H = r.height;
+  const tool = (ST.tool === "orbit" && !is3) ? "dots" : ST.tool;
+  if (tool === "orbit"){ stx.drag = {type:"orbit", id:e.pointerId, x:px, y:py, yaw:ST.cam.yaw, pitch:ST.cam.pitch}; return; }
+  if (tool === "draw"){
+    const w = stWorld(px, py); if (!w) return;
+    stx.playing = false; stx.rec = [{x:w.x, y:w.y, z:w.z || 0, t:0}]; stx.recT0 = performance.now();
+    stx.drag = {type:"draw", id:e.pointerId, last:w, ls:performance.now()}; return;
+  }
+  if (d.kind === "dots"){
+    for (let i = d.dots.length - 1; i >= 0; i--){ const s = stScreen(d.dots[i]); if (Math.hypot(s.x - px, s.y - py) < 26){ stx.drag = {type:"dot", id:e.pointerId, i}; return; } }
+  }
+  const w = stWorld(px, py); if (!w || d.dots.length >= 40) return;
+  d.kind = "dots"; d.drawn = []; d.dots.push({x:w.x, y:w.y, z:w.z || 0});
+  stx.drag = {type:"dot", id:e.pointerId, i:d.dots.length - 1}; stx.t = 0; stTouch();
+});
+document.addEventListener("pointermove", e => {
+  const dr = stx.drag; if (!dr || e.pointerId !== dr.id) return;
+  const cv = document.getElementById("studioCanvas"); if (!cv) return;
+  const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+  if (dr.type === "orbit"){ ST.cam.yaw = dr.yaw + (px - dr.x)*.01; ST.cam.pitch = Math.max(.2, Math.min(1.3, dr.pitch + (py - dr.y)*.005)); return; }
+  if (dr.type === "draw"){ const w = stWorld(px, py); if (w) dr.last = w; return; }
+  if (dr.type === "dot"){
+    const dot = stData().dots[dr.i]; if (!dot) return;
+    const w = stWorld(px, py, ST.mode === "3d" ? dot.y : null);
+    if (w){ dot.x = w.x; dot.y = w.y; dot.z = w.z || 0; stx.v++; }
+  }
+});
+function stFinishDraw(dr){
+  const rec = stx.rec || []; stx.rec = null; if (!rec.length) return;
+  rec.push({x:dr.last.x, y:dr.last.y, z:dr.last.z || 0, t:performance.now() - stx.recT0});
+  const is3 = ST.mode === "3d", W = stx.W, H = stx.H;
+  const dist = (a, b) => is3 ? Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)*200 : Math.hypot((a.x - b.x)*W, (a.y - b.y)*H);
+  let out = [], lk = null, len = 0;
+  for (const s of rec){ if (!lk || dist(s, lk) >= 1.5 || s.t - lk.t >= 80){ if (lk) len += dist(s, lk); out.push(s); lk = s; } }
+  if (out[out.length - 1] !== rec[rec.length - 1]) out.push(rec[rec.length - 1]);
+  if (out.length < 3 || len < 12 || out[out.length - 1].t < 200) return;
+  if (out.length > 900){ const step = Math.ceil(out.length / 900), last = out[out.length - 1]; out = out.filter((_, i) => i % step === 0); if (out[out.length - 1] !== last) out.push(last); }
+  const d = stData(); d.kind = "draw";
+  d.drawn = out.map(s => ({x:+s.x.toFixed(4), y:+s.y.toFixed(4), z:+(s.z || 0).toFixed(4), t:Math.round(s.t)}));
+  stx.t = 0; stx.playing = true; stTouch();
+}
+function stPointerEnd(e){
+  const dr = stx.drag; if (!dr || e.pointerId !== dr.id) return;
+  stx.drag = null;
+  if (dr.type === "draw") stFinishDraw(dr); else stSave();
+}
+document.addEventListener("pointerup", stPointerEnd);
+document.addEventListener("pointercancel", stPointerEnd);
+document.addEventListener("input", e => {
+  const id = e.target.id;
+  if (id === "studioSpeed"){ ST.speed = +e.target.value; const l = document.getElementById("studioSpeedLbl"); if (l) l.textContent = ST.speed.toFixed(2).replace(/0$/, "") + "×"; stSave(); }
+  else if (id === "studioScrub"){ const tr = stEnsureTrack(); if (tr){ stx.t = (+e.target.value / 1000) * tr.dur; stx.playing = false; } }
+  else if (id === "studioHeight"){ ST.cam.h = +e.target.value / 100; stSave(); }
+  else if (id === "studioCap"){ ST.caption = e.target.value.slice(0, 60); stSave(); }
+});
+
+/* ---- export: record the canvas as a video (free, on this device) ---- */
+function stSetMsg(t){ stx.exportMsg = t; const el = document.getElementById("studioExportMsg"); if (el) el.textContent = t; }
+function stExport(){
+  if (typeof MediaRecorder === "undefined" || !HTMLCanvasElement.prototype.captureStream){ stSetMsg("This browser can't record video. Use your phone's screen recorder instead."); return; }
+  const tr = stEnsureTrack(); if (!tr){ stSetMsg("Add at least two dots (or draw a path) first."); return; }
+  const cv = document.getElementById("studioCanvas"); if (!cv) return;
+  let rec;
+  try{
+    const types = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm", "video/mp4"];
+    const mime = types.find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
+    rec = new MediaRecorder(cv.captureStream(30), mime ? {mimeType:mime, videoBitsPerSecond:4000000} : {});
+  }catch(err){ stSetMsg("Video recording isn't available here."); return; }
+  const chunks = [];
+  rec.ondataavailable = ev => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+  rec.onstop = () => {
+    const type = rec.mimeType || "video/webm", blob = new Blob(chunks, {type});
+    if (stx.exportUrl) URL.revokeObjectURL(stx.exportUrl);
+    stx.exportBlob = blob; stx.exportUrl = URL.createObjectURL(blob); stx.exportExt = type.indexOf("mp4") >= 0 ? "mp4" : "webm";
+    stx.exporting = false; stx.finishing = false; stx.recorder = null; stx.exportMsg = "Video ready. Save or share it below."; render();
+  };
+  stx.recorder = rec; stx.finishing = false; stx.exporting = true; stx.t = 0; stx.playing = true;
+  stSetMsg("Recording one full loop…");
+  rec.start();
+}
+async function stShare(){
+  if (!stx.exportBlob) return;
+  const file = new File([stx.exportBlob], "recall-motion." + stx.exportExt, {type:stx.exportBlob.type});
+  try{
+    if (navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file], title:"Made with Recall"});
+    else stSetMsg("Sharing isn't supported here. Use Save video instead.");
+  }catch(err){ if (err && err.name !== "AbortError") stSetMsg("Couldn't open the share sheet. Use Save video instead."); }
+}
+
+I.studio = '<svg viewBox="0 0 24 24"><circle cx="5" cy="17" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="19" cy="15" r="2"/><path d="M6.5 15.5C8 11 10 9 11 8.5M13.5 8.5C16 9.5 17.5 12 18 13.2" stroke-dasharray="2 2.5"/></svg>';
+
+function viewStudio(){
+  const is3 = ST.mode === "3d", tool = (ST.tool === "orbit" && !is3) ? "dots" : ST.tool, cur = is3 ? ST.actor3 : ST.actor2;
+  const chip = (act, attrs, label, on) => `<button class="chip" data-act="${act}" ${attrs} aria-pressed="${on}">${label}</button>`;
+  const tog = (k, label) => chip("sttoggle", `data-k="${k}"`, label, !!ST[k]);
+  return `<div class="st-kicker">MOTION STUDIO</div>
+    <div class="st-title">Place dots. Watch them move.</div>
+    <div class="seg" role="group" aria-label="Dimension"><button data-act="stmode" data-m="2d" aria-pressed="${!is3}">2D</button><button data-act="stmode" data-m="3d" aria-pressed="${is3}">3D</button></div>
+    <canvas id="studioCanvas" class="st-canvas" aria-label="Animation canvas"></canvas>
+    <div class="st-tools">
+      <button class="st-tool" data-act="sttool" data-t="dots" aria-pressed="${tool === "dots"}">● Dots</button>
+      <button class="st-tool" data-act="sttool" data-t="draw" aria-pressed="${tool === "draw"}">✎ Draw</button>
+      ${is3 ? `<button class="st-tool" data-act="sttool" data-t="orbit" aria-pressed="${tool === "orbit"}">⟳ View</button>` : ""}
+      <button class="st-tool" data-act="stundo">↶</button>
+      <button class="st-tool" data-act="stclear" aria-label="Clear">✕</button>
+    </div>
+    <div class="st-play"><button id="studioPlay" class="btn" data-act="stplay">▶ Play</button>
+      <div class="st-time"><input id="studioScrub" type="range" min="0" max="1000" value="0" aria-label="Timeline"><span id="studioTime">Add 2+ dots</span></div></div>
+    <div class="msg">${tool === "draw" ? "Drag to draw. Your motion, including pauses and speed, is replayed exactly." : is3 ? "Tap the floor to add dots. Use the height slider for altitude, and View to rotate." : "Tap to add dots. Drag a dot to move it. Press Play to animate along the path."}</div>
+    <h2 class="sec">Look</h2>
+    <div class="st-chips">${ST_ACTORS[ST.mode].map(([id, n]) => chip("stactor", `data-a="${id}"`, n, cur === id)).join("")}</div>
+    <div class="st-swatches">${ST_COLORS.map(c => `<button class="st-sw" data-act="stcolor" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${ST.color === c}"></button>`).join("")}</div>
+    <h2 class="sec">Motion</h2>
+    <div class="st-chips">${tog("trail", "Trail")}${tog("loop", "Loop")}${tog("closed", "Closed path")}${tog("smooth", "Smooth start/stop")}${is3 ? tog("spin", "Spin view") : ""}</div>
+    <div class="st-slider"><label for="studioSpeed">Speed</label><input id="studioSpeed" type="range" min="0.25" max="3" step="0.05" value="${ST.speed}"><span id="studioSpeedLbl">${ST.speed.toFixed(2).replace(/0$/, "")}×</span></div>
+    ${is3 ? `<div class="st-slider"><label for="studioHeight">Dot height</label><input id="studioHeight" type="range" min="0" max="100" value="${Math.round(ST.cam.h*100)}"><span></span></div>` : ""}
+    <h2 class="sec">Caption</h2>
+    <input class="f" id="studioCap" maxlength="60" placeholder="Optional caption shown in the video" value="${esc(ST.caption)}" aria-label="Caption">
+    <h2 class="sec">Start from a template</h2>
+    <div class="st-chips">${ST_TPL[ST.mode].map((t, i) => chip("sttpl", `data-i="${i}"`, t[0], false)).join("")}</div>
+    <h2 class="sec">Export</h2>
+    <button class="btn" data-act="stexport">⏺ Export video (one loop)</button>
+    <div class="st-chips" style="margin-top:10px">${tog("wm", "Add “Made with Recall” tag")}</div>
+    <div id="studioExportMsg" class="msg">${esc(stx.exportMsg)}</div>
+    ${stx.exportUrl ? `<video class="st-video" src="${stx.exportUrl}" controls playsinline loop muted></video>
+      <div class="row" style="margin-top:10px"><a class="btn small" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex:1" href="${stx.exportUrl}" download="recall-motion.${stx.exportExt}">Save video</a><button class="btn ghost small" style="flex:1" data-act="stshare">Share</button></div>` : ""}
+    <div class="note" style="margin-top:18px">Everything is made on this phone. Nothing is uploaded. Some apps accept only MP4; if your phone saves WebM, open it in your gallery or a free converter first.</div>`;
+}
+
+/* ---------- views ---------- */
+function viewWelcome(){
+  return `<div class="welcome">
+    <div class="brand">${MARK}<div class="logo">Recall</div></div>
+    <h1>Know exactly when you'll be exam-ready.</h1>
+    <p class="muted" style="font-size:17px;margin:0">Recall plans your study days around your exam date and shows you a readiness score you can trust.</p>
+    <div class="point"><div class="dot">1</div><div><b>Plan</b><span>Set your exam date. Get a daily target that fits.</span></div></div>
+    <div class="point"><div class="dot">2</div><div><b>Create in seconds</b><span>Paste your notes and turn them into cards.</span></div></div>
+    <div class="point"><div class="dot">3</div><div><b>Verify</b><span>Check any question against reliable sources, then cite it on the card.</span></div></div>
+    <p class="muted" style="font-size:14px;margin:22px 0 14px">Free, no account, no ads. Your cards stay on this phone.</p>
+    <button class="btn" data-act="welcome">Get started</button>
+  </div>`;
+}
+function viewToday(){
+  const q = queue(), n = q.all.length, mins = Math.max(1, Math.round(n * 25 / 60));
+  let hero;
+  const cta = `<button class="btn" data-act="start" ${n ? "" : "disabled"}>${n ? `Start today's session · ~${mins} min` : "All done for today"}</button>`;
+  const plan = `<div class="plan"><div><b>${q.rev.length}</b><span>reviews due</span></div><div><b>${q.nw.length}</b><span>new cards</span></div><div><b>${n}</b><span>total today</span></div></div>`;
+  if (S.exam && daysLeft() >= 0){
+    const p = readiness(), dl = daysLeft();
+    hero = `<section class="hero"><div class="top">${ring(p)}<div>
+      <div class="lbl">${esc(S.exam.name)}</div>
+      <div class="ttl">${dl === 0 ? "Exam day" : dl + " day" + (dl === 1 ? "" : "s") + " to go"}</div>
+      <div class="lbl">${readyLabel(p)}</div></div></div>${plan}${cta}</section>
+      <p class="muted" style="font-size:13px;margin:10px 2px 0">Readiness estimates your recall on exam day if you stopped studying today. It rises as you review. It is not a prediction of your exam score.</p>`;
+  } else {
+    hero = `<section class="hero"><div class="lbl">Today</div><div class="big">${n}</div><div class="lbl">${n ? "cards to study" : "You're all caught up."}</div>${plan}${cta}</section>`;
+    hero += `<div class="card" style="margin-top:14px">
+      <div style="font-weight:800">${S.exam ? "Your exam date has passed" : "Studying for an exam?"}</div>
+      <p class="muted" style="font-size:14px;margin:4px 0 0">Add the date and Recall sets a daily target so you're ready in time.</p>
+      <input class="f" id="exname" placeholder="Exam name, e.g. Biology final" value="${esc(ui.exname)}" aria-label="Exam name">
+      <input class="f" id="exdate" type="date" value="${esc(ui.exdate)}" aria-label="Exam date">
+      <button class="btn" style="margin-top:10px" data-act="setexam">Plan my study days</button>
+      ${ui.msg ? `<div class="msg">${esc(ui.msg)}</div>` : ""}</div>`;
+  }
+  const days = [...Array(7)].map((_, i) => { const t = Date.now() - (6 - i) * DAY; return {l:"SMTWTFS"[new Date(t).getDay()], n:S.log[ymd(t)] || 0, t:i === 6}; });
+  const mx = Math.max(1, ...days.map(d => d.n)), total = days.reduce((a, d) => a + d.n, 0);
+  return hero + `<h2 class="sec">This week · ${total} reviews</h2>
+    <div class="card"><div class="bars">${days.map(d => `<div class="bar ${d.t ? "t" : ""}"><i style="height:${Math.max(5, d.n / mx * 56)}px"></i><span>${d.l}</span></div>`).join("")}</div></div>`;
+}
+function viewReview(){
+  const q = queue(), c = q.all[0];
+  if (!c) return `<div style="text-align:center;margin-top:70px"><div style="font-family:var(--serif);font-size:32px;font-weight:700">Session complete</div>
+    <p class="muted">Nice work. Streak: ${streakNow()} day${streakNow() === 1 ? "" : "s"}.</p>
+    <button class="btn" style="margin-top:14px" data-act="end">Back to today</button></div>`;
+  const total = Math.max(1, ui.sessionTotal || q.all.length), done = Math.max(0, total - q.all.length);
+  const grades = [["Again",0],["Hard",1],["Good",2],["Easy",3]];
+  return `
+  <div class="muted" style="margin:10px 0 0;font-weight:700;font-size:14px">${q.all.length} left</div>
+  <div class="progress" aria-hidden="true"><i style="width:${Math.min(100, done / total * 100)}%"></i></div>
+  <div class="flash" aria-live="polite">
+    <div class="side">${ui.shown ? "Answer" : "Question"}</div>
+    <div class="txt">${esc(ui.shown ? c.back : c.front)}</div>
+    ${ui.shown && c.src ? `<div class="cite">Verified from ${esc(c.src)}</div>` : ""}
+  </div>
+  ${ui.shown
+    ? `<div class="grades">${grades.map(([t,g]) => `<button class="g g${g}" data-act="grade" data-g="${g}">${t}<small>${lab(grade(c,g).interval)}</small></button>`).join("")}</div>`
+    : `<button class="btn" style="margin-top:14px" data-act="show">Show answer</button>`}
+  <button class="btn ghost" style="margin-top:12px" data-act="end">End session</button>`;
+}
+function cardStatus(c){
+  if (c.last == null) return "New";
+  if (c.due <= Date.now()) return "Due now";
+  return "Next review in " + Math.max(1, Math.ceil((c.due - Date.now()) / DAY)) + "d";
+}
+function viewLibrary(){
+  const write = `<div class="card" style="margin-top:12px">
+      <input class="f" id="front" placeholder="Question" value="${esc(ui.front)}" aria-label="Question">
+      <textarea class="f" id="back" rows="2" placeholder="Answer" aria-label="Answer">${esc(ui.back)}</textarea>
+      <input class="f" id="srcn" placeholder="Source (optional), e.g. Khan Academy" value="${esc(ui.srcn)}" aria-label="Source">
+      <button class="btn" style="margin-top:10px" data-act="add">Add card</button></div>`;
+  const notes = `<div class="card" style="margin-top:12px">
+      <div class="muted" style="font-size:14px">Paste your notes. Recall drafts cards from lines like <b>Term: definition</b>, <b>Question? Answer</b>, <b>Term - definition</b>, and sentences like “X is …”. It uses simple rules, not AI, so check each card.</div>
+      <textarea class="f box" id="notes" rows="6" placeholder="Paste notes here" aria-label="Notes">${esc(ui.notes)}</textarea>
+      <button class="btn" style="margin-top:10px" data-act="draft">Draft cards</button></div>
+      ${ui.drafts.length ? `<h2 class="sec">${ui.drafts.filter(d => d.on).length} of ${ui.drafts.length} selected</h2>` +
+        ui.drafts.map((d, i) => `<label class="card item draft"><input type="checkbox" data-act="toggledraft" data-i="${i}" ${d.on ? "checked" : ""}><div><div class="q">${esc(d.f)}</div><div class="a">${esc(d.b)}</div></div></label>`).join("") +
+        `<button class="btn" style="margin-top:14px" data-act="adddrafts" ${ui.drafts.some(d => d.on) ? "" : "disabled"}>Add selected cards</button>` : ""}`;
+  const list = S.cards.slice().reverse().map(c => `<div class="card item"><div style="flex:1;min-width:0"><div class="q">${esc(c.front)}</div><div class="a">${esc(c.back)}</div>
+      ${c.src ? `<span class="chipsrc">Source: ${esc(c.src)}</span>` : ""}<span class="chipst">${cardStatus(c)}</span></div>
+      <button class="icon-btn" aria-label="Delete card" data-act="del" data-id="${c.id}">${I.trash}</button></div>`).join("");
+  return `<div class="seg" role="group" aria-label="Create">
+      <button data-act="mode" data-m="write" aria-pressed="${ui.mode === "write"}">Write a card</button>
+      <button data-act="mode" data-m="notes" aria-pressed="${ui.mode === "notes"}">From notes</button></div>
+    ${ui.mode === "write" ? write : notes}
+    ${ui.msg ? `<div class="msg">${esc(ui.msg)}</div>` : ""}
+    <h2 class="sec">Your cards · ${S.cards.length}</h2>${list || '<p class="muted">No cards yet.</p>'}`;
+}
+function viewSources(){
+  const cat = CATS.find(c => c.id === ui.topic);
+  const chips = `<div class="chips" role="group" aria-label="Topic">${CATS.map(c => `<button class="chip" data-act="topic" data-id="${c.id}" aria-pressed="${ui.topic === c.id}">${c.name}</button>`).join("")}</div>`;
+  let results = "";
+  if (ui.searched && cat){
+    results = `<h2 class="sec">Top 3 sources + AI Assistant</h2>` +
+      cat.src.map((k, i) => { const s = S_[k]; return `
+      <article class="res"><div class="num">0${i + 1}</div><div style="flex:1;min-width:0">
+        <div class="nm">${esc(s.n)}</div><span class="pill">${esc(s.t)}</span><p>${esc(s.why)}</p>
+        <a class="open" href="${esc(s.u(ui.q))}" target="_blank" rel="noopener noreferrer" data-act="opened" data-name="${esc(s.n)}">Open in browser ${I.ext}</a>
+      </div></article>`; }).join("") +
+      aiCrossCheckView() +
+      (cat.note ? `<div class="note">${esc(cat.note)}</div>` : "") +
+      `<button class="btn ghost" style="margin-top:14px" data-act="tocard">Save this as a flashcard${ui.lastSrc ? " (cites " + esc(ui.lastSrc) + ")" : ""}</button>`;
+  }
+  const hist = S.history.length ? `<h2 class="sec">Recent questions</h2>` + S.history.map((h, i) => `<button class="hist" data-act="rerun" data-i="${i}">${esc(h)}</button>`).join("") : "";
+  return `<div class="kicker">SOURCE FINDER</div>
+    <div class="src-title">Go straight to the source.</div>
+    ${ui.fromLens ? `<div class="from-lens"><b>Checking an answer from Lens</b><p>Compare these sources with what the on-device AI said. A small AI can be wrong, so trust the sources.</p><blockquote>${esc(String(ui.lensCheckText||"").slice(0,260))}${String(ui.lensCheckText||"").length>260?"…":""}</blockquote><p>If the wording is off, edit the question below and search again.</p><button class="btn ghost small" data-act="lensfromsrc">← Back to Lens</button></div>` : ""}
+    <div class="ask"><textarea id="q" rows="3" placeholder="Type a question, e.g. How does the heart pump blood?" aria-label="Your question">${esc(ui.q)}</textarea>
+    <button class="btn" data-act="find">Find 3 trusted sources</button></div>
+    ${ui.searched ? chips : ""}${results}${hist}
+    <div class="note" style="margin-top:22px">The first three links open trusted sources. Source 4 lets you hand the question to ChatGPT, Gemini, or Claude without giving Recall an API key or access to your AI account.</div>`;
+}
+function viewYou(){
+  const mature = S.cards.filter(c => c.interval >= 21).length;
+  const reviews = Object.values(S.log).reduce((a, b) => a + b, 0);
+  return `<h2 class="sec" style="margin-top:14px">Your progress</h2>
+    <div class="grid2" style="margin-top:0">
+      <div class="card stat"><b>${S.cards.length}</b><span>cards</span></div>
+      <div class="card stat"><b>${mature}</b><span>locked in 3+ weeks</span></div>
+      <div class="card stat"><b>${reviews}</b><span>total reviews</span></div>
+      <div class="card stat"><b>${streakNow()}</b><span>day streak</span></div></div>
+    ${S.exam ? `<h2 class="sec">Exam</h2><div class="card"><div style="font-weight:800">${esc(S.exam.name)}</div><div class="muted" style="font-size:14px">${esc(S.exam.date)}</div>
+      <button class="btn ghost small" style="margin-top:10px" data-act="clearexam">Remove exam</button></div>` : ""}
+    <h2 class="sec">Privacy and trust</h2>
+    <div class="card muted" style="font-size:15px">
+      <div><b style="color:var(--ink)">Everything stays on this phone.</b> No account, no tracking, no ads. Recall is free.</div>
+      <div style="margin-top:8px">The Source Finder opens each website's own search in your browser. Recall never sees what you read there.</div></div>
+    <h2 class="sec">How Recall works</h2>
+    <div class="card muted" style="font-size:15px">You forget new information fast, and each well-timed review slows the forgetting. Recall schedules every card right before you'd forget it, and rolls that up into your readiness for exam day.</div>
+    <h2 class="sec">Backup and move devices</h2>
+    <div class="card"><textarea class="f box" id="bk" rows="3" placeholder="Backup text appears here" style="font-size:13px">${esc(ui.bk)}</textarea>
+      <div class="row" style="margin-top:10px"><button class="btn small ghost" style="flex:1" data-act="export">Export</button><button class="btn small ghost" style="flex:1" data-act="import">Import</button></div>
+      ${ui.msg ? `<div class="msg">${esc(ui.msg)}</div>` : ""}</div>
+    <button class="btn danger" style="margin-top:22px" data-act="reset">Erase all data on this phone</button>
+    <p class="muted" style="font-size:12px;text-align:center;margin-top:16px">Recall v1.0 · free forever</p>`;
+}
+
+/* ---------- render ---------- */
+function renderInner(){
+  const app = document.getElementById("app");
+  if (!S.onboarded){ document.body.classList.remove("src"); app.innerHTML = viewWelcome(); return; }
+  document.body.classList.toggle("src", ui.tab === "src");
+  document.body.classList.toggle("lens", ui.tab === "lens");
+  document.body.classList.toggle("studio", ui.tab === "studio");
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", ui.tab === "lens" ? "#050507" : ui.tab === "studio" ? "#000000" : ui.tab === "src" ? "#0C1330" : "#0A2418");
+  const tags = {today:"Exam-ready, on schedule", lib:"Build your deck", src:"Verify what you study", lens:"See it. Understand it. Act.", studio:"Animate anything with dots", you:"Your progress and privacy"};
+  const body = ui.tab === "today" ? (ui.reviewing ? viewReview() : viewToday()) : ui.tab === "lib" ? viewLibrary() : ui.tab === "src" ? viewSources() : ui.tab === "lens" ? viewLens() : ui.tab === "studio" ? viewStudio() : viewYou();
+  const tabs = [["today","Today"],["lib","Library"],["src","Sources"],["lens","Lens"],["studio","Studio"],["you","You"]];
+  app.innerHTML = `<header><div class="brand">${MARK}<div><div class="logo">Recall</div><div class="tag">${tags[ui.tab]}</div></div></div>
+    <div class="streak" aria-label="Study streak">${I.flame}${streakNow()}</div></header>
+    <main>${body}</main>
+    <nav aria-label="Main"><div class="in">${tabs.map(([id, t]) => `<button data-act="tab" data-id="${id}" ${ui.tab === id ? 'aria-current="page"' : ""}>${I[id]}${t}</button>`).join("")}</div></nav>`;
+  if (ui.tab === "studio") stEnter();
+}
+
+function render(){
+  try{ renderInner(); }
+  catch(err){ console.error(err); if (window.__recallPanel) window.__recallPanel(String((err && err.stack) || err).slice(0, 400)); }
+}
+
+/* ---------- actions ---------- */
+function find(q){
+  q = q.trim(); if (!q) return;
+  ui.q = q; ui.topic = detect(q); ui.searched = true; ui.lastSrc = "";
+  S.history = [q, ...S.history.filter(h => h !== q)].slice(0, 8); save(); render();
+}
+document.addEventListener("input", e => {
+  const id = e.target.id;
+  if (id && Object.prototype.hasOwnProperty.call(ui, id) && typeof ui[id] === "string") ui[id] = e.target.value;
+});
+document.addEventListener("change", e => { if (e.target.id === "lensFile" && e.target.files && e.target.files[0]) lensUseFile(e.target.files[0]); });
+document.addEventListener("keydown", e => {
+  if (e.target.id === "q" && e.key === "Enter" && !e.shiftKey){ e.preventDefault(); find(e.target.value); }
+  if (e.target.id === "lensAIQuestion" && e.key === "Enter" && !e.shiftKey){ e.preventDefault(); lensAskLocal(); }
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const a = b.dataset.act;
+  if (a === "opened"){ ui.lastSrc = b.dataset.name; return; }
+  if (a === "welcome"){ S.onboarded = true; save(); }
+  else if (a === "tab"){ if (ui.tab === "lens" && b.dataset.id !== "lens") stopLensCamera(); if (b.dataset.id !== "src") ui.fromLens = false; ui.tab = b.dataset.id; ui.reviewing = false; ui.msg = ""; if (ui.tab === "lens" && ui.lensStage === "home") return lensStart(); }
+  else if (a === "lensstart"){ return lensStart(); }
+  else if (a === "lenscamera"){ return lensOpenCamera(); }
+  else if (a === "lenscapture"){ return lensCapture(); }
+  else if (a === "lenspick"){ const f=document.getElementById("lensFile"); if(f) f.click(); return; }
+  else if (a === "lensback"){ lensReset(); }
+  else if (a === "lenschatback"){ ui.lensStage="result"; ui.lensAIError=""; render(); }
+  else if (a === "lenslocal"){ return lensLocalChatOpen(); }
+  else if (a === "lensstarter"){ ui.lensAIQuestion=b.dataset.q||""; return lensAskLocal(); }
+  else if (a === "lensask"){ return lensAskLocal(); }
+  else if (a === "lenschatreset"){ return lensLocalResetChat(); }
+  else if (a === "lensfast"){ try{ localStorage.removeItem(LENS_SAFE); }catch(_){} ui.lensNotice=""; }
+  else if (a === "lenscheck"){ return lensCheckInSources(+b.dataset.i); }
+  else if (a === "lensfromsrc"){ ui.fromLens = false; ui.tab = "lens"; }
+  else if (a === "stmode"){ ST.mode = b.dataset.m; if (ST.mode === "2d" && ST.tool === "orbit") ST.tool = "dots"; stx.t = 0; stx.playing = false; stTouch(); }
+  else if (a === "sttool"){ ST.tool = b.dataset.t; stSave(); }
+  else if (a === "stundo"){ const d = stData(); if (d.kind === "draw"){ d.kind = "dots"; d.drawn = []; } else d.dots.pop(); stx.t = 0; stTouch(); }
+  else if (a === "stclear"){ const d = stData(); d.kind = "dots"; d.dots = []; d.drawn = []; ST.closed = false; stx.t = 0; stx.playing = false; stTouch(); }
+  else if (a === "stplay"){ const tr = stEnsureTrack(); if (!tr) return; if (!stx.playing && stx.t >= tr.dur - .01) stx.t = 0; stx.playing = !stx.playing; return; }
+  else if (a === "stactor"){ if (ST.mode === "3d") ST.actor3 = b.dataset.a; else ST.actor2 = b.dataset.a; stSave(); }
+  else if (a === "stcolor"){ ST.color = b.dataset.c; stSave(); }
+  else if (a === "sttoggle"){ const k = b.dataset.k; ST[k] = !ST[k]; if (k === "closed" || k === "smooth") stTouch(); else stSave(); }
+  else if (a === "sttpl"){ stApplyTemplate(+b.dataset.i); }
+  else if (a === "stexport"){ return stExport(); }
+  else if (a === "stshare"){ return stShare(); }
+  else if (a === "lensretry"){ ui.lensAIError=""; loadLensLocalAI().catch(()=>{}); return; }
+  else if (a === "lensshare"){ return lensShare(); }
+  else if (a === "lenssave"){ return lensSaveVisual(); }
+  else if (a === "lensdownload"){ return lensDownload(); }
+  else if (a === "start"){ ui.reviewing = true; ui.shown = false; ui.sessionTotal = queue().all.length; }
+  else if (a === "end"){ ui.reviewing = false; }
+  else if (a === "show"){ ui.shown = true; }
+  else if (a === "grade"){
+    const c = queue().all[0]; if (!c) return;
+    const wasNew = c.last == null, today = todayKey();
+    S.cards = S.cards.map(x => x.id === c.id ? grade(x, +b.dataset.g) : x);
+    if (wasNew) dayState().done++;
+    S.log[today] = (S.log[today] || 0) + 1;
+    if (S.lastStudy !== today){ S.streak = S.lastStudy === ymd(Date.now() - DAY) ? S.streak + 1 : 1; S.lastStudy = today; }
+    ui.shown = false; save();
+  }
+  else if (a === "setexam"){
+    if (!ui.exname.trim() || !ui.exdate){ ui.msg = "Add an exam name and date."; }
+    else if (new Date(ui.exdate + "T23:59:00").getTime() < Date.now()){ ui.msg = "Pick a date in the future."; }
+    else { S.exam = {name:ui.exname.trim(), date:ui.exdate}; S.day = null; ui.exname = ""; ui.exdate = ""; ui.msg = ""; save(); }
+  }
+  else if (a === "clearexam"){ S.exam = null; S.day = null; save(); }
+  else if (a === "mode"){ ui.mode = b.dataset.m; ui.msg = ""; }
+  else if (a === "add"){
+    if (!ui.front.trim() || !ui.back.trim()){ ui.msg = "Add both a question and an answer."; }
+    else { S.cards.push(newCard(ui.front.trim(), ui.back.trim(), ui.srcn.trim())); ui.front = ""; ui.back = ""; ui.srcn = ""; ui.msg = "Card added."; save(); }
+  }
+  else if (a === "del"){ S.cards = S.cards.filter(c => c.id !== b.dataset.id); save(); }
+  else if (a === "draft"){
+    ui.drafts = draftCards(ui.notes);
+    ui.msg = ui.drafts.length ? "" : "No cards found. Try lines like “Term: definition” or “Question? Answer”.";
+  }
+  else if (a === "toggledraft"){ const d = ui.drafts[+b.dataset.i]; if (d) d.on = !d.on; }
+  else if (a === "adddrafts"){
+    const picked = ui.drafts.filter(d => d.on);
+    picked.forEach(d => S.cards.push(newCard(d.f, d.b)));
+    ui.msg = "Added " + picked.length + " card" + (picked.length === 1 ? "" : "s") + "."; ui.drafts = []; ui.notes = ""; save();
+  }
+  else if (a === "export"){ ui.bk = JSON.stringify(S); ui.msg = "Exported. Copy this text and keep it somewhere safe."; }
+  else if (a === "import"){
+    try{ const p = JSON.parse(ui.bk); if (!Array.isArray(p.cards)) throw 0;
+      S = Object.assign({exam:null, log:{}, day:null, history:[], onboarded:true, streak:0, lastStudy:null}, p); save(); ui.msg = "Backup restored."; }
+    catch(err){ ui.msg = "That isn't a valid backup. Paste the full exported text."; }
+  }
+  else if (a === "reset"){
+    if (confirm("Erase all cards and progress on this phone? This can't be undone.")){
+      try{ localStorage.removeItem(KEY); }catch(err){}
+      S = Object.assign({exam:null, log:{}, day:null, history:[], onboarded:false, streak:0, lastStudy:null}, {cards:STARTER.map(([f, g]) => newCard(f, g))});
+      ui.tab = "today"; ui.msg = "";
+    } else return;
+  }
+  else if (a === "find"){ const t = document.getElementById("q"); return find(t ? t.value : ui.q); }
+  else if (a === "openai"){ return openAIApp(b.dataset.ai); }
+  else if (a === "topic"){ ui.topic = b.dataset.id; }
+  else if (a === "rerun"){ return find(S.history[+b.dataset.i]); }
+  else if (a === "tocard"){ ui.front = ui.q; ui.back = ""; ui.srcn = ui.lastSrc; ui.mode = "write"; ui.tab = "lib"; ui.msg = "Write the answer from what you read, then add the card."; }
+  render();
+});
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) navigator.serviceWorker.register("sw.js").catch(() => {});
+render();
+</script>
+</body>
+</html>
